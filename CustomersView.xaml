@@ -1,0 +1,23 @@
+<UserControl x:Class="StadiumManagementSystem.Views.CustomersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{DynamicResource Customers}" FontSize="28" FontWeight="Bold" Foreground="#1F4E78" Margin="0,0,0,20"/>
+
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Customers}" AutoGenerateColumns="False" 
+                  IsReadOnly="True" Background="White" BorderThickness="0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="*"/>
+                <DataGridTextColumn Header="Total Bookings" Binding="{Binding TotalBookings}" Width="*"/>
+                <DataGridTextColumn Header="Total Spent" Binding="{Binding TotalSpent, StringFormat='{}{0} YER'}" Width="*"/>
+                <DataGridTextColumn Header="Last Booking" Binding="{Binding LastBooking, StringFormat=d}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

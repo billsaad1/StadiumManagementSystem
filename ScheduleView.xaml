@@ -1,0 +1,38 @@
+<UserControl x:Class="StadiumManagementSystem.Views.ScheduleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{DynamicResource Schedule}" FontSize="28" FontWeight="Bold" Foreground="#1F4E78" Margin="0,0,0,20"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
+            <DatePicker SelectedDate="{Binding SelectedDate}" Width="150" Margin="0,0,20,0"/>
+            <ComboBox SelectedItem="{Binding SelectedStadium}" Width="150">
+                <ComboBoxItem Content="Stadium 1"/>
+                <ComboBoxItem Content="Stadium 2"/>
+            </ComboBox>
+        </StackPanel>
+
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Slots}" AutoGenerateColumns="False" 
+                  IsReadOnly="True" Background="White" BorderThickness="0">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Time Slot" Binding="{Binding TimeRange}" Width="150"/>
+                <DataGridTemplateColumn Header="Status" Width="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding Status, Converter={StaticResource StatusToColorConverter}}" CornerRadius="4" Padding="5,2">
+                                <TextBlock Text="{Binding Status}" Foreground="White" HorizontalAlignment="Center"/>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Customer" Binding="{Binding Customer}" Width="*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
