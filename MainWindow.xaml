@@ -1,0 +1,60 @@
+<Window x:Class="StadiumManagementSystem.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:v="clr-namespace:StadiumManagementSystem.Views"
+        xmlns:vm="clr-namespace:StadiumManagementSystem.ViewModels"
+        Title="{DynamicResource Title}" Height="720" Width="1280"
+        WindowStartupLocation="CenterScreen" FlowDirection="{DynamicResource FlowDirection}">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+            <v:DashboardView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:BookingsViewModel}">
+            <v:BookingsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:CustomersViewModel}">
+            <v:CustomersView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+            <v:SettingsView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ScheduleViewModel}">
+            <v:ScheduleView/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:FinancialsViewModel}">
+            <v:FinancialsView/>
+        </DataTemplate>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Sidebar -->
+        <Border Background="#1F4E78" Grid.Column="0">
+            <StackPanel Margin="10">
+                <TextBlock Text="STADIUM" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,20,0,40" HorizontalAlignment="Center"/>
+                
+                <Button Content="{DynamicResource Dashboard}" Command="{Binding NavigateToDashboardCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                <Button Content="{DynamicResource Bookings}" Command="{Binding NavigateToBookingsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                <Button Content="{DynamicResource Customers}" Command="{Binding NavigateToCustomersCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                <Button Content="{DynamicResource Schedule}" Command="{Binding NavigateToScheduleCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                <Button Content="{DynamicResource Financials}" Command="{Binding NavigateToFinancialsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                <Button Content="{DynamicResource Settings}" Command="{Binding NavigateToSettingsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                
+                <Separator Margin="0,20" Background="#3E7BB0"/>
+
+                <Button Content="English / العربية" Command="{Binding ToggleLanguageCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                
+                <Button Content="{DynamicResource Logout}" Style="{StaticResource SidebarButtonStyle}"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Main Content Area -->
+        <Grid Grid.Column="1" Background="#F0F2F5">
+            <ContentControl Content="{Binding CurrentViewModel}"/>
+        </Grid>
+    </Grid>
+</Window>

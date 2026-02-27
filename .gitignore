@@ -1,0 +1,15 @@
+# .NET build artifacts
+bin/
+obj/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.doccache
+
+# SQLite database
+*.db
+*.db-shm
+*.db-wal

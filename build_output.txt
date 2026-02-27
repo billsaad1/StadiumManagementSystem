@@ -1,0 +1,14 @@
+  Determining projects to restore...
+/app/StadiumManagementSystem/StadiumManagementSystem.csproj : warning NU1603: StadiumManagementSystem depends on LiveChartsCore.SkiaSharpView.WPF (>= 2.0.0-rc2.1) but LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc2.1 was not found. LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc3 was resolved instead.
+  All projects are up-to-date for restore.
+/app/StadiumManagementSystem/StadiumManagementSystem.csproj : warning NU1603: StadiumManagementSystem depends on LiveChartsCore.SkiaSharpView.WPF (>= 2.0.0-rc2.1) but LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc2.1 was not found. LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc3 was resolved instead.
+  StadiumManagementSystem -> /app/StadiumManagementSystem/bin/Debug/net10.0-windows/StadiumManagementSystem.dll
+
+Build succeeded.
+
+/app/StadiumManagementSystem/StadiumManagementSystem.csproj : warning NU1603: StadiumManagementSystem depends on LiveChartsCore.SkiaSharpView.WPF (>= 2.0.0-rc2.1) but LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc2.1 was not found. LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc3 was resolved instead.
+/app/StadiumManagementSystem/StadiumManagementSystem.csproj : warning NU1603: StadiumManagementSystem depends on LiveChartsCore.SkiaSharpView.WPF (>= 2.0.0-rc2.1) but LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc2.1 was not found. LiveChartsCore.SkiaSharpView.WPF 2.0.0-rc3 was resolved instead.
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.01

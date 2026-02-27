@@ -1,0 +1,29 @@
+using System.Windows;
+using StadiumManagementSystem.Data;
+using StadiumManagementSystem.Views;
+using StadiumManagementSystem.ViewModels;
+
+namespace StadiumManagementSystem
+{
+    public partial class App : Application
+    {
+        public static DatabaseService Database { get; private set; } = null!;
+
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            Database = new DatabaseService();
+
+            var loginView = new LoginView();
+            if (loginView.ShowDialog() == true)
+            {
+                var mainWindow = new MainWindow();
+                mainWindow.DataContext = new MainViewModel();
+                mainWindow.Show();
+            }
+            else
+            {
+                Shutdown();
+            }
+        }
+    }
+}
