@@ -20,6 +20,8 @@ namespace StadiumManagementSystem.Data
             connection.Open();
 
             var command = connection.CreateCommand();
+
+            // 1. Create tables with all columns
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Users (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,25 +76,19 @@ namespace StadiumManagementSystem.Data
                     Value TEXT
                 );
 
-                INSERT OR IGNORE INTO Users (Username, Password, Role, FullName) 
-                VALUES ('admin', '1234', 'Admin', 'System Administrator');
-
-                -- Ensure Users table has new columns if it already existed
-                -- SQLite doesn't support IF NOT EXISTS in ALTER TABLE or BEGIN/EXCEPTION blocks like this,
-                -- so we handle it by catching errors in code if needed, but for CREATE TABLE it is fine.
-
-                -- Default settings
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('OrganizationName', 'Jeel Al Bena Association');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium1Price', '8000');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium2Price', '8000');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('ManagerName', 'Bilal Al Salami');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Location', 'Sana''a, Yemen');
+                CREATE TABLE IF NOT EXISTS Stadiums (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT NOT NULL,
+                    MorningPrice REAL,
+                    EveningPrice REAL,
+                    IsActive INTEGER DEFAULT 1
+                );
             ";
             command.ExecuteNonQuery();
 
-            // Try to add new columns if they don't exist (for older databases)
-            string[] columns = { "FullName TEXT", "IsActive INTEGER DEFAULT 1", "Notes TEXT" };
-            foreach (var col in columns)
+            // 2. Ensure columns exist for older databases (ALTER TABLE)
+            string[] userColumns = { "FullName TEXT", "IsActive INTEGER DEFAULT 1", "Notes TEXT" };
+            foreach (var col in userColumns)
             {
                 try
                 {
@@ -100,8 +96,35 @@ namespace StadiumManagementSystem.Data
                     alterCmd.CommandText = $"ALTER TABLE Users ADD COLUMN {col};";
                     alterCmd.ExecuteNonQuery();
                 }
-                catch { /* Column probably exists or table doesn't exist yet (unlikely) */ }
+                catch { /* Column already exists */ }
             }
+
+            // 3. Default data and migrations
+            command.CommandText = @"
+                INSERT OR IGNORE INTO Users (Username, Password, Role, FullName)
+                VALUES ('admin', '1234', 'Admin', 'System Administrator');
+
+                -- Default settings
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('OrganizationName', 'Jeel Al Bena Association');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium1Price', '8000');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium2Price', '8000');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('ManagerName', 'Bilal Al Salami');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Location', 'Sana''a, Yemen');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Phone', '+967 777 123 456');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Address', 'Main Street, Sana''a');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('EveningCutoffHour', '18');
+                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('ThemeColor', '#1F4E78');
+
+                -- Initial migration for Stadiums from legacy settings
+                INSERT OR IGNORE INTO Stadiums (Name, MorningPrice, EveningPrice)
+                SELECT 'Stadium 1', CAST(Value AS REAL), CAST(Value AS REAL) FROM Settings WHERE Key = 'Stadium1Price'
+                AND NOT EXISTS (SELECT 1 FROM Stadiums WHERE Name = 'Stadium 1');
+
+                INSERT OR IGNORE INTO Stadiums (Name, MorningPrice, EveningPrice)
+                SELECT 'Stadium 2', CAST(Value AS REAL), CAST(Value AS REAL) FROM Settings WHERE Key = 'Stadium2Price'
+                AND NOT EXISTS (SELECT 1 FROM Stadiums WHERE Name = 'Stadium 2');
+            ";
+            command.ExecuteNonQuery();
         }
 
         public Settings GetSettings()
@@ -121,8 +144,10 @@ namespace StadiumManagementSystem.Data
                     case "OrganizationName": settings.OrganizationName = val; break;
                     case "ManagerName": settings.ManagerName = val; break;
                     case "Location": settings.Location = val; break;
-                    case "Stadium1Price": settings.Stadium1Price = decimal.Parse(val); break;
-                    case "Stadium2Price": settings.Stadium2Price = decimal.Parse(val); break;
+                    case "Phone": settings.Phone = val; break;
+                    case "Address": settings.Address = val; break;
+                    case "EveningCutoffHour": settings.EveningCutoffHour = int.Parse(val); break;
+                    case "ThemeColor": settings.ThemeColor = val; break;
                     case "LogoPath": settings.LogoPath = val; break;
                 }
             }
@@ -138,15 +163,19 @@ namespace StadiumManagementSystem.Data
                 INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('OrganizationName', @org);
                 INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('ManagerName', @man);
                 INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('Location', @loc);
-                INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('Stadium1Price', @s1);
-                INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('Stadium2Price', @s2);
+                INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('Phone', @phone);
+                INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('Address', @addr);
+                INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('EveningCutoffHour', @cutoff);
+                INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('ThemeColor', @theme);
                 INSERT OR REPLACE INTO Settings (Key, Value) VALUES ('LogoPath', @logo);
             ";
             command.Parameters.AddWithValue("@org", settings.OrganizationName);
             command.Parameters.AddWithValue("@man", settings.ManagerName);
             command.Parameters.AddWithValue("@loc", settings.Location);
-            command.Parameters.AddWithValue("@s1", settings.Stadium1Price.ToString());
-            command.Parameters.AddWithValue("@s2", settings.Stadium2Price.ToString());
+            command.Parameters.AddWithValue("@phone", settings.Phone);
+            command.Parameters.AddWithValue("@addr", settings.Address);
+            command.Parameters.AddWithValue("@cutoff", settings.EveningCutoffHour.ToString());
+            command.Parameters.AddWithValue("@theme", settings.ThemeColor);
             command.Parameters.AddWithValue("@logo", settings.LogoPath ?? "");
             command.ExecuteNonQuery();
         }
@@ -359,6 +388,65 @@ namespace StadiumManagementSystem.Data
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = "DELETE FROM Users WHERE Id = @id";
+            command.Parameters.AddWithValue("@id", id);
+            command.ExecuteNonQuery();
+        }
+
+        public List<Stadium> GetStadiums()
+        {
+            var list = new List<Stadium>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT * FROM Stadiums";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new Stadium
+                {
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    MorningPrice = reader.GetDecimal(2),
+                    EveningPrice = reader.GetDecimal(3),
+                    IsActive = reader.GetInt32(4) == 1
+                });
+            }
+            return list;
+        }
+
+        public void SaveStadium(Stadium stadium)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            if (stadium.Id == 0)
+            {
+                command.CommandText = @"
+                    INSERT INTO Stadiums (Name, MorningPrice, EveningPrice, IsActive)
+                    VALUES (@n, @mp, @ep, @a)
+                ";
+            }
+            else
+            {
+                command.CommandText = @"
+                    UPDATE Stadiums SET Name=@n, MorningPrice=@mp, EveningPrice=@ep, IsActive=@a
+                    WHERE Id=@id
+                ";
+                command.Parameters.AddWithValue("@id", stadium.Id);
+            }
+            command.Parameters.AddWithValue("@n", stadium.Name);
+            command.Parameters.AddWithValue("@mp", stadium.MorningPrice);
+            command.Parameters.AddWithValue("@ep", stadium.EveningPrice);
+            command.Parameters.AddWithValue("@a", stadium.IsActive ? 1 : 0);
+            command.ExecuteNonQuery();
+        }
+
+        public void DeleteStadium(int id)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM Stadiums WHERE Id = @id";
             command.Parameters.AddWithValue("@id", id);
             command.ExecuteNonQuery();
         }

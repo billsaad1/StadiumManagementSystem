@@ -13,6 +13,10 @@ namespace StadiumManagementSystem
         {
             Database = new DatabaseService();
 
+            // Load theme from settings
+            var settings = Database.GetSettings();
+            Helpers.ThemeHelper.ApplyTheme(settings.ThemeColor);
+
             var loginView = new LoginView();
             if (loginView.ShowDialog() == true)
             {

@@ -7,6 +7,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources/StringResources.en.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <SolidColorBrush x:Key="PrimaryColor" Color="#1F4E78"/>
+            <SolidColorBrush x:Key="PrimaryColorDark" Color="#153653"/>
             
             <h:StatusToColorConverter x:Key="StatusToColorConverter" xmlns:h="clr-namespace:StadiumManagementSystem.Helpers"/>
             <h:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter" xmlns:h="clr-namespace:StadiumManagementSystem.Helpers"/>
@@ -21,7 +24,7 @@
                 <Setter Property="Margin" Value="0,5"/>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#3E7BB0"/>
+                        <Setter Property="Background" Value="{DynamicResource PrimaryColorDark}"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>

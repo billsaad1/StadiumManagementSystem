@@ -2,6 +2,7 @@ using StadiumManagementSystem.Data;
 using StadiumManagementSystem.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace StadiumManagementSystem.ViewModels
 {
@@ -17,7 +18,10 @@ namespace StadiumManagementSystem.ViewModels
         private DateTime _bookingDate = DateTime.Today;
 
         [ObservableProperty]
-        private string _stadium = "Stadium 1";
+        private Stadium? _selectedStadium;
+
+        [ObservableProperty]
+        private ObservableCollection<Stadium> _stadiums;
 
         [ObservableProperty]
         private int _startHour = 10;
@@ -33,19 +37,28 @@ namespace StadiumManagementSystem.ViewModels
         public NewBookingViewModel()
         {
             _settings = App.Database.GetSettings();
+            _stadiums = new ObservableCollection<Stadium>(App.Database.GetStadiums().Where(s => s.IsActive));
+            SelectedStadium = Stadiums.FirstOrDefault();
             UpdatePrice();
         }
 
         partial void OnStartHourChanged(int value) => UpdatePrice();
         partial void OnEndHourChanged(int value) => UpdatePrice();
-        partial void OnStadiumChanged(string value) => UpdatePrice();
+        partial void OnSelectedStadiumChanged(Stadium? value) => UpdatePrice();
 
         private void UpdatePrice()
         {
-            int duration = EndHour - StartHour + 1;
-            if (duration < 1) duration = 0;
-            decimal pricePerHour = Stadium.Contains("1") ? _settings.Stadium1Price : _settings.Stadium2Price;
-            TotalPrice = duration * pricePerHour;
+            if (SelectedStadium == null) return;
+
+            decimal total = 0;
+            for (int h = StartHour; h <= EndHour; h++)
+            {
+                if (h >= _settings.EveningCutoffHour)
+                    total += SelectedStadium.EveningPrice;
+                else
+                    total += SelectedStadium.MorningPrice;
+            }
+            TotalPrice = total;
         }
 
         public event Action<bool>? RequestClose;
@@ -53,7 +66,7 @@ namespace StadiumManagementSystem.ViewModels
         [RelayCommand]
         private void Save()
         {
-            if (string.IsNullOrWhiteSpace(CustomerName)) return;
+            if (string.IsNullOrWhiteSpace(CustomerName) || SelectedStadium == null) return;
             if (StartHour < 1 || StartHour > 24 || EndHour < 1 || EndHour > 24)
             {
                 System.Windows.MessageBox.Show("Hours must be between 1 and 24");
@@ -65,7 +78,7 @@ namespace StadiumManagementSystem.ViewModels
                 return;
             }
 
-            if (!App.Database.CheckAvailability(Stadium, BookingDate, StartHour, EndHour))
+            if (!App.Database.CheckAvailability(SelectedStadium.Name, BookingDate, StartHour, EndHour))
             {
                 System.Windows.MessageBox.Show("Time slot is already booked!");
                 return;
@@ -73,9 +86,9 @@ namespace StadiumManagementSystem.ViewModels
 
             var booking = new Booking
             {
-                BookingNumber = $"BK-{BookingDate:yyMMdd}-S{(Stadium.Contains("1") ? "1" : "2")}-H{StartHour:D2}",
+                BookingNumber = $"BK-{BookingDate:yyMMdd}-{SelectedStadium.Name.Substring(0, Math.Min(3, SelectedStadium.Name.Length)).ToUpper()}-H{StartHour:D2}",
                 BookingDate = BookingDate,
-                Stadium = Stadium,
+                Stadium = SelectedStadium.Name,
                 StartHour = StartHour,
                 EndHour = EndHour,
                 Duration = EndHour - StartHour + 1,

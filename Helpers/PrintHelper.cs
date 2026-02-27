@@ -32,7 +32,7 @@ namespace StadiumManagementSystem.Helpers
                 };
                 doc.Blocks.Add(header);
 
-                Paragraph subHeader = new Paragraph(new Run($"{settings.Location} | Manager: {settings.ManagerName}"))
+                Paragraph subHeader = new Paragraph(new Run($"{settings.Address}, {settings.Location}\nPhone: {settings.Phone} | Manager: {settings.ManagerName}"))
                 {
                     FontSize = 12,
                     FontStyle = FontStyles.Italic,

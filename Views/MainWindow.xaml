@@ -36,7 +36,7 @@
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar -->
-        <Border Background="#1F4E78" Grid.Column="0">
+        <Border Background="{DynamicResource PrimaryColor}" Grid.Column="0">
             <StackPanel Margin="10">
                 <TextBlock Text="STADIUM" Foreground="White" FontSize="24" FontWeight="Bold" Margin="0,20,0,40" HorizontalAlignment="Center"/>
                 
@@ -49,7 +49,7 @@
                         Visibility="{Binding CurrentUser.Role, Converter={StaticResource RoleToVisibilityConverter}, ConverterParameter='Admin'}"/>
                 <Button Content="{DynamicResource Settings}" Command="{Binding NavigateToSettingsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 
-                <Separator Margin="0,20" Background="#3E7BB0"/>
+                <Separator Margin="0,20" Background="{DynamicResource PrimaryColorDark}"/>
 
                 <Button Content="English / العربية" Command="{Binding ToggleLanguageCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 

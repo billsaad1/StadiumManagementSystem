@@ -7,7 +7,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{DynamicResource Customers}" FontSize="28" FontWeight="Bold" Foreground="#1F4E78" Margin="0,0,0,20"/>
+        <TextBlock Grid.Row="0" Text="{DynamicResource Customers}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}" Margin="0,0,0,20"/>
 
         <DataGrid Grid.Row="1" ItemsSource="{Binding Customers}" AutoGenerateColumns="False" 
                   IsReadOnly="True" Background="White" BorderThickness="0">
