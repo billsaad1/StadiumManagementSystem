@@ -1,4 +1,4 @@
-<Window x:Class="StadiumManagementSystem.MainWindow"
+<Window x:Class="StadiumManagementSystem.Views.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:v="clr-namespace:StadiumManagementSystem.Views"
@@ -24,6 +24,9 @@
         <DataTemplate DataType="{x:Type vm:FinancialsViewModel}">
             <v:FinancialsView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:UsersViewModel}">
+            <v:UsersView/>
+        </DataTemplate>
     </Window.Resources>
     
     <Grid>
@@ -42,6 +45,8 @@
                 <Button Content="{DynamicResource Customers}" Command="{Binding NavigateToCustomersCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 <Button Content="{DynamicResource Schedule}" Command="{Binding NavigateToScheduleCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 <Button Content="{DynamicResource Financials}" Command="{Binding NavigateToFinancialsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                <Button Content="{DynamicResource Users}" Command="{Binding NavigateToUsersCommand}" Style="{StaticResource SidebarButtonStyle}"
+                        Visibility="{Binding CurrentUser.Role, Converter={StaticResource RoleToVisibilityConverter}, ConverterParameter='Admin'}"/>
                 <Button Content="{DynamicResource Settings}" Command="{Binding NavigateToSettingsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 
                 <Separator Margin="0,20" Background="#3E7BB0"/>

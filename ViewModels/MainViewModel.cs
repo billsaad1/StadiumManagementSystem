@@ -1,5 +1,8 @@
+using StadiumManagementSystem.Data;
+using StadiumManagementSystem.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+
 
 namespace StadiumManagementSystem.ViewModels
 {
@@ -8,8 +11,12 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private ObservableObject? _currentViewModel;
 
-        public MainViewModel()
+        [ObservableProperty]
+        private User? _currentUser;
+
+        public MainViewModel(User user)
         {
+            CurrentUser = user;
             NavigateToDashboard();
         }
 
@@ -30,6 +37,15 @@ namespace StadiumManagementSystem.ViewModels
 
         [RelayCommand]
         private void NavigateToFinancials() => CurrentViewModel = new FinancialsViewModel();
+
+        [RelayCommand]
+        private void NavigateToUsers()
+        {
+            if (CurrentUser?.Role == "Admin")
+            {
+                CurrentViewModel = new UsersViewModel();
+            }
+        }
 
         [RelayCommand]
         private void ToggleLanguage()

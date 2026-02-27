@@ -1,9 +1,10 @@
+using StadiumManagementSystem.Data;
+using StadiumManagementSystem.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using System.Collections.ObjectModel;
-using StadiumManagementSystem.Models;
 
 namespace StadiumManagementSystem.ViewModels
 {

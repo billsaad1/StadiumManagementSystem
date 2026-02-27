@@ -1,6 +1,7 @@
+using StadiumManagementSystem.Data;
+using StadiumManagementSystem.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
-using StadiumManagementSystem.Models;
 
 namespace StadiumManagementSystem.ViewModels
 {

@@ -1,6 +1,6 @@
+using StadiumManagementSystem.Models;
 using System.Data;
 using Microsoft.Data.Sqlite;
-using StadiumManagementSystem.Models;
 
 namespace StadiumManagementSystem.Data
 {
@@ -77,6 +77,10 @@ namespace StadiumManagementSystem.Data
                 INSERT OR IGNORE INTO Users (Username, Password, Role, FullName) 
                 VALUES ('admin', '1234', 'Admin', 'System Administrator');
 
+                -- Ensure Users table has new columns if it already existed
+                -- SQLite doesn't support IF NOT EXISTS in ALTER TABLE or BEGIN/EXCEPTION blocks like this,
+                -- so we handle it by catching errors in code if needed, but for CREATE TABLE it is fine.
+
                 -- Default settings
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('OrganizationName', 'Jeel Al Bena Association');
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium1Price', '8000');
@@ -85,6 +89,19 @@ namespace StadiumManagementSystem.Data
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Location', 'Sana''a, Yemen');
             ";
             command.ExecuteNonQuery();
+
+            // Try to add new columns if they don't exist (for older databases)
+            string[] columns = { "FullName TEXT", "IsActive INTEGER DEFAULT 1", "Notes TEXT" };
+            foreach (var col in columns)
+            {
+                try
+                {
+                    var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = $"ALTER TABLE Users ADD COLUMN {col};";
+                    alterCmd.ExecuteNonQuery();
+                }
+                catch { /* Column probably exists or table doesn't exist yet (unlikely) */ }
+            }
         }
 
         public Settings GetSettings()
@@ -281,6 +298,69 @@ namespace StadiumManagementSystem.Data
                 });
             }
             return list;
+        }
+
+        public List<User> GetUsers()
+        {
+            var list = new List<User>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT * FROM Users";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new User
+                {
+                    Id = reader.GetInt32(0),
+                    Username = reader.GetString(1),
+                    Password = reader.GetString(2),
+                    Role = reader.GetString(3),
+                    FullName = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    IsActive = reader.GetInt32(5) == 1,
+                    Notes = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                });
+            }
+            return list;
+        }
+
+        public void SaveUser(User user)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            if (user.Id == 0)
+            {
+                command.CommandText = @"
+                    INSERT INTO Users (Username, Password, Role, FullName, IsActive, Notes)
+                    VALUES (@u, @p, @r, @f, @a, @n)
+                ";
+            }
+            else
+            {
+                command.CommandText = @"
+                    UPDATE Users SET Username=@u, Password=@p, Role=@r, FullName=@f, IsActive=@a, Notes=@n
+                    WHERE Id=@id
+                ";
+                command.Parameters.AddWithValue("@id", user.Id);
+            }
+            command.Parameters.AddWithValue("@u", user.Username);
+            command.Parameters.AddWithValue("@p", user.Password);
+            command.Parameters.AddWithValue("@r", user.Role);
+            command.Parameters.AddWithValue("@f", user.FullName);
+            command.Parameters.AddWithValue("@a", user.IsActive ? 1 : 0);
+            command.Parameters.AddWithValue("@n", user.Notes);
+            command.ExecuteNonQuery();
+        }
+
+        public void DeleteUser(int id)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM Users WHERE Id = @id";
+            command.Parameters.AddWithValue("@id", id);
+            command.ExecuteNonQuery();
         }
     }
 }

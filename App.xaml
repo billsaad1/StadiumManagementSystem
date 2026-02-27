@@ -5,10 +5,11 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Resources/StringResources.en.xaml"/>
+                <ResourceDictionary Source="/Resources/StringResources.en.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             
             <h:StatusToColorConverter x:Key="StatusToColorConverter" xmlns:h="clr-namespace:StadiumManagementSystem.Helpers"/>
+            <h:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter" xmlns:h="clr-namespace:StadiumManagementSystem.Helpers"/>
 
             <Style x:Key="SidebarButtonStyle" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>

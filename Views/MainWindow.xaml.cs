@@ -1,3 +1,5 @@
+using StadiumManagementSystem.ViewModels;
+using StadiumManagementSystem.Models;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,7 +11,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace StadiumManagementSystem;
+namespace StadiumManagementSystem.Views;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
