@@ -1,0 +1,35 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <system:String x:Key="Title">نظام إدارة الملعب</system:String>
+    <system:String x:Key="Login">تسجيل الدخول</system:String>
+    <system:String x:Key="Username">اسم المستخدم</system:String>
+    <system:String x:Key="Password">كلمة المرور</system:String>
+    <system:String x:Key="Dashboard">لوحة القيادة</system:String>
+    <system:String x:Key="Bookings">الحجوزات</system:String>
+    <system:String x:Key="Customers">العملاء</system:String>
+    <system:String x:Key="Schedule">الجدول</system:String>
+    <system:String x:Key="Financials">المالية</system:String>
+    <system:String x:Key="Users">أعضاء الفريق</system:String>
+    <system:String x:Key="UserManagement">إدارة الموظفين</system:String>
+    <system:String x:Key="UserDetails">بيانات الموظف</system:String>
+    <system:String x:Key="FullName">الاسم الكامل</system:String>
+    <system:String x:Key="Role">الدور</system:String>
+    <system:String x:Key="IsActive">نشط</system:String>
+    <system:String x:Key="Notes">ملاحظات</system:String>
+    <system:String x:Key="DeleteUser">حذف الموظف</system:String>
+    <system:String x:Key="Clear">مسح</system:String>
+    <system:String x:Key="Settings">الإعدادات</system:String>
+    <system:String x:Key="Logout">تسجيل الخروج</system:String>
+    <FlowDirection x:Key="FlowDirection">RightToLeft</FlowDirection>
+    <system:String x:Key="BookingsToday">حجوزات اليوم</system:String>
+    <system:String x:Key="RevenueToday">إيرادات اليوم</system:String>
+    <system:String x:Key="AvailableSlots">الفتحات المتاحة</system:String>
+    <system:String x:Key="WeeklyRevenue">الإيرادات الأسبوعية</system:String>
+    <system:String x:Key="Reminders">تذكيرات (الغد)</system:String>
+    <system:String x:Key="NewBooking">حجز جديد</system:String>
+    <system:String x:Key="Save">حفظ</system:String>
+    <system:String x:Key="OrganizationName">اسم المنظمة</system:String>
+    <system:String x:Key="ManagerName">اسم المدير</system:String>
+    <system:String x:Key="Location">الموقع</system:String>
+</ResourceDictionary>

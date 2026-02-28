@@ -1,0 +1,35 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    <system:String x:Key="Title">Stadium Management System</system:String>
+    <system:String x:Key="Login">Login</system:String>
+    <system:String x:Key="Username">Username</system:String>
+    <system:String x:Key="Password">Password</system:String>
+    <system:String x:Key="Dashboard">Dashboard</system:String>
+    <system:String x:Key="Bookings">Bookings</system:String>
+    <system:String x:Key="Customers">Customers</system:String>
+    <system:String x:Key="Schedule">Schedule</system:String>
+    <system:String x:Key="Financials">Financials</system:String>
+    <system:String x:Key="Users">Staff Members</system:String>
+    <system:String x:Key="UserManagement">Staff Management</system:String>
+    <system:String x:Key="UserDetails">Staff Details</system:String>
+    <system:String x:Key="FullName">Full Name</system:String>
+    <system:String x:Key="Role">Role</system:String>
+    <system:String x:Key="IsActive">Is Active</system:String>
+    <system:String x:Key="Notes">Notes</system:String>
+    <system:String x:Key="DeleteUser">Delete Staff</system:String>
+    <system:String x:Key="Clear">Clear</system:String>
+    <system:String x:Key="Settings">Settings</system:String>
+    <system:String x:Key="Logout">Logout</system:String>
+    <FlowDirection x:Key="FlowDirection">LeftToRight</FlowDirection>
+    <system:String x:Key="BookingsToday">Bookings Today</system:String>
+    <system:String x:Key="RevenueToday">Revenue Today</system:String>
+    <system:String x:Key="AvailableSlots">Available Slots</system:String>
+    <system:String x:Key="WeeklyRevenue">Weekly Revenue</system:String>
+    <system:String x:Key="Reminders">Reminders (Tomorrow)</system:String>
+    <system:String x:Key="NewBooking">New Booking</system:String>
+    <system:String x:Key="Save">Save</system:String>
+    <system:String x:Key="OrganizationName">Organization Name</system:String>
+    <system:String x:Key="ManagerName">Manager Name</system:String>
+    <system:String x:Key="Location">Location</system:String>
+</ResourceDictionary>
