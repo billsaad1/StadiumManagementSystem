@@ -67,7 +67,7 @@ namespace StadiumManagementSystem.ViewModels
             {
                 new Axis
                 {
-                    Labels = last7Days.Select(d => d.ToString("ddd")).ToArray()
+                    Labels = last7Days.Select(d => Helpers.ArabicHelper.FixArabicText(d.ToString("ddd"))).ToArray()
                 }
             };
         }
@@ -78,7 +78,7 @@ namespace StadiumManagementSystem.ViewModels
             if (string.IsNullOrEmpty(booking.CustomerPhone)) return;
             
             string message = $"Hello {booking.CustomerName}, this is a reminder of your reservation at Stadium on {booking.BookingDate:dd/MM} at {booking.TimeSlot}. Thank you!";
-            string url = $"https://wa.me/{booking.CustomerPhone}?text={Uri.EscapeDataString(message)}";
+            string url = $"https://wa.me/{booking.CustomerPhone.Replace("+", "").Replace(" ", "")}?text={Uri.EscapeDataString(message)}";
             
             System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
             {

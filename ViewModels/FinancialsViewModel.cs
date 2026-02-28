@@ -3,6 +3,7 @@ using System.Linq;
 using StadiumManagementSystem.Data;
 using StadiumManagementSystem.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 
 namespace StadiumManagementSystem.ViewModels
@@ -20,6 +21,13 @@ namespace StadiumManagementSystem.ViewModels
 
         [ObservableProperty]
         private int _totalBookings;
+
+        [RelayCommand]
+        private void PrintReport()
+        {
+            var settings = App.Database.GetSettings();
+            Helpers.PrintHelper.PrintFinancialReport(StartDate, EndDate, TotalBookings, TotalRevenue, settings);
+        }
 
         public FinancialsViewModel()
         {

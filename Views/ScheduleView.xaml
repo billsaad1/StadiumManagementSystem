@@ -8,7 +8,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{DynamicResource Schedule}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}" Margin="0,0,0,20"/>
+        <DockPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="{DynamicResource Schedule}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}"/>
+            <Button Content="Print Schedule" Command="{Binding PrintCommand}" HorizontalAlignment="Right" Padding="15,5" Background="{DynamicResource PrimaryColor}" Foreground="White" BorderThickness="0"/>
+        </DockPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
             <DatePicker SelectedDate="{Binding SelectedDate}" Width="150" Margin="0,0,20,0"/>

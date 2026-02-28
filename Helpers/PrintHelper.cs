@@ -70,5 +70,83 @@ namespace StadiumManagementSystem.Helpers
                 printDialog.PrintDocument(idpSource.DocumentPaginator, "Stadium Receipt");
             }
         }
+
+        public static void PrintSchedule(DateTime date, string stadium, IEnumerable<ViewModels.ScheduleSlot> slots, Settings settings)
+        {
+            PrintDialog printDialog = new PrintDialog();
+            if (printDialog.ShowDialog() == true)
+            {
+                FlowDocument doc = new FlowDocument();
+                doc.PagePadding = new Thickness(50);
+                doc.FontFamily = new FontFamily("Segoe UI");
+
+                Paragraph header = new Paragraph(new Run($"{settings.OrganizationName} - SCHEDULE"))
+                {
+                    FontSize = 20,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = TextAlignment.Center
+                };
+                doc.Blocks.Add(header);
+
+                doc.Blocks.Add(new Paragraph(new Run($"Date: {date:d} | Stadium: {stadium}")) { TextAlignment = TextAlignment.Center });
+
+                Table table = new Table { CellSpacing = 0, BorderBrush = Brushes.Black, BorderThickness = new Thickness(1) };
+                table.Columns.Add(new TableColumn { Width = new GridLength(150) });
+                table.Columns.Add(new TableColumn { Width = new GridLength(100) });
+                table.Columns.Add(new TableColumn { Width = new GridLength(250) });
+
+                TableRowGroup group = new TableRowGroup();
+                TableRow headerRow = new TableRow { FontWeight = FontWeights.Bold, Background = Brushes.LightGray };
+                headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Time Slot"))));
+                headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Status"))));
+                headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Customer"))));
+                group.Rows.Add(headerRow);
+
+                foreach (var slot in slots)
+                {
+                    TableRow row = new TableRow();
+                    row.Cells.Add(new TableCell(new Paragraph(new Run(slot.TimeRange))));
+                    row.Cells.Add(new TableCell(new Paragraph(new Run(slot.Status))));
+                    row.Cells.Add(new TableCell(new Paragraph(new Run(slot.Customer))));
+                    group.Rows.Add(row);
+                }
+
+                table.RowGroups.Add(group);
+                doc.Blocks.Add(table);
+
+                printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Stadium Schedule");
+            }
+        }
+
+        public static void PrintFinancialReport(DateTime start, DateTime end, int totalBookings, decimal totalRevenue, Settings settings)
+        {
+            PrintDialog printDialog = new PrintDialog();
+            if (printDialog.ShowDialog() == true)
+            {
+                FlowDocument doc = new FlowDocument();
+                doc.PagePadding = new Thickness(50);
+                doc.FontFamily = new FontFamily("Segoe UI");
+
+                Paragraph header = new Paragraph(new Run($"{settings.OrganizationName} - FINANCIAL REPORT"))
+                {
+                    FontSize = 20,
+                    FontWeight = FontWeights.Bold,
+                    TextAlignment = TextAlignment.Center
+                };
+                doc.Blocks.Add(header);
+
+                doc.Blocks.Add(new Paragraph(new Run($"Period: {start:d} to {end:d}")) { TextAlignment = TextAlignment.Center });
+                doc.Blocks.Add(new Paragraph(new Run("--------------------------------------------------")) { TextAlignment = TextAlignment.Center });
+
+                Section summary = new Section();
+                summary.Blocks.Add(new Paragraph(new Run($"Total Bookings: {totalBookings}")) { FontSize = 16 });
+                summary.Blocks.Add(new Paragraph(new Run($"Total Revenue: {totalRevenue:N0} YER")) { FontSize = 16, FontWeight = FontWeights.Bold });
+                doc.Blocks.Add(summary);
+
+                doc.Blocks.Add(new Paragraph(new Run("\nReport Generated on: " + DateTime.Now.ToString("g"))));
+
+                printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Financial Report");
+            }
+        }
     }
 }

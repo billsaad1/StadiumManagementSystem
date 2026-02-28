@@ -33,5 +33,27 @@ namespace StadiumManagementSystem.ViewModels
                 LoadBookings();
             }
         }
+
+        [RelayCommand]
+        private void PrintReceipt(Booking booking)
+        {
+            var settings = App.Database.GetSettings();
+            Helpers.PrintHelper.PrintReceipt(booking, settings);
+        }
+
+        [RelayCommand]
+        private void SendWhatsApp(Booking booking)
+        {
+            if (string.IsNullOrEmpty(booking.CustomerPhone)) return;
+
+            string message = $"Hello {booking.CustomerName}, regarding your booking {booking.BookingNumber} on {booking.BookingDate:dd/MM}. Status: {booking.PaymentStatus}.";
+            string url = $"https://wa.me/{booking.CustomerPhone.Replace("+", "").Replace(" ", "")}?text={Uri.EscapeDataString(message)}";
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
     }
 }

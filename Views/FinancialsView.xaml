@@ -8,7 +8,10 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="{DynamicResource Financials}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}" Margin="0,0,0,20"/>
+        <DockPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="{DynamicResource Financials}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}"/>
+            <Button Content="Print Report" Command="{Binding PrintReportCommand}" HorizontalAlignment="Right" Padding="15,5" Background="{DynamicResource PrimaryColor}" Foreground="White" BorderThickness="0"/>
+        </DockPanel>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
             <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,10,0"/>
