@@ -202,7 +202,7 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Users WHERE Username = @u AND Password = @p AND IsActive = 1";
+            command.CommandText = "SELECT Id, Username, Role, FullName FROM Users WHERE Username = @u AND Password = @p AND IsActive = 1";
             command.Parameters.AddWithValue("@u", username);
             command.Parameters.AddWithValue("@p", password);
             using var reader = command.ExecuteReader();
@@ -212,8 +212,8 @@ namespace StadiumManagementSystem.Data
                 {
                     Id = reader.GetInt32(0),
                     Username = reader.GetString(1),
-                    Role = reader.GetString(3),
-                    FullName = reader.IsDBNull(4) ? "" : reader.GetString(4)
+                    Role = reader.GetString(2),
+                    FullName = reader.IsDBNull(3) ? "" : reader.GetString(3)
                 };
             }
             return null;
@@ -288,7 +288,11 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Bookings ORDER BY CreatedAt DESC";
+            command.CommandText = @"
+                SELECT Id, BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot,
+                       CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance,
+                       PaymentMethod, PaymentStatus, Notes, CreatedAt
+                FROM Bookings ORDER BY CreatedAt DESC";
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -298,10 +302,21 @@ namespace StadiumManagementSystem.Data
                     BookingNumber = reader.GetString(1),
                     BookingDate = DateTime.Parse(reader.GetString(2)),
                     Stadium = reader.GetString(3),
+                    StartHour = reader.GetInt32(4),
+                    EndHour = reader.GetInt32(5),
+                    Duration = reader.GetInt32(6),
                     TimeSlot = reader.GetString(7),
+                    CustomerId = reader.GetInt32(8),
                     CustomerName = reader.GetString(9),
+                    CustomerPhone = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                    Status = reader.GetString(11),
                     TotalPrice = reader.GetDecimal(12),
-                    PaymentStatus = reader.GetString(15)
+                    Deposit = reader.GetDecimal(13),
+                    Balance = reader.GetDecimal(14),
+                    PaymentMethod = reader.GetString(15),
+                    PaymentStatus = reader.GetString(16),
+                    Notes = reader.IsDBNull(17) ? "" : reader.GetString(17),
+                    CreatedAt = DateTime.Parse(reader.GetString(18))
                 });
             }
             return list;
@@ -313,7 +328,9 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Customers ORDER BY TotalSpent DESC";
+            command.CommandText = @"
+                SELECT Id, Name, Phone, Email, Address, Type, RegistrationDate, TotalBookings, TotalSpent, LastBooking, Notes, IsActive
+                FROM Customers ORDER BY TotalSpent DESC";
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -322,8 +339,15 @@ namespace StadiumManagementSystem.Data
                     Id = reader.GetInt32(0),
                     Name = reader.GetString(1),
                     Phone = reader.GetString(2),
+                    Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                    Address = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    Type = reader.GetString(5),
+                    RegistrationDate = DateTime.Parse(reader.GetString(6)),
                     TotalBookings = reader.GetInt32(7),
-                    TotalSpent = reader.GetDecimal(8)
+                    TotalSpent = reader.GetDecimal(8),
+                    LastBooking = reader.IsDBNull(9) ? null : DateTime.Parse(reader.GetString(9)),
+                    Notes = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                    IsActive = reader.GetInt32(11) == 1
                 });
             }
             return list;
@@ -335,7 +359,7 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Users";
+            command.CommandText = "SELECT Id, Username, Password, Role, FullName, IsActive, Notes FROM Users";
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -398,7 +422,7 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Stadiums";
+            command.CommandText = "SELECT Id, Name, MorningPrice, EveningPrice, IsActive FROM Stadiums";
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
