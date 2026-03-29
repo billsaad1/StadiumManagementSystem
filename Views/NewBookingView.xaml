@@ -32,8 +32,23 @@
                 </StackPanel>
             </Grid>
 
-            <TextBlock Text="{Binding TotalPrice, StringFormat='Total: {0} YER'}" 
-                       FontSize="18" FontWeight="Bold" Foreground="#28A745" Margin="0,0,0,20"/>
+            <Grid Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="0,0,5,0">
+                    <TextBlock Text="Total Price"/>
+                    <TextBox Text="{Binding TotalPrice, StringFormat=N0}" IsReadOnly="True" FontWeight="Bold" Padding="5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+                    <TextBlock Text="Paid Amount"/>
+                    <TextBox Text="{Binding Deposit, UpdateSourceTrigger=PropertyChanged}" Padding="5" Background="#E8F5E9"/>
+                </StackPanel>
+            </Grid>
+
+            <TextBlock Text="{Binding Balance, StringFormat='Remaining: {0:N0} YER'}"
+                       FontSize="18" FontWeight="Bold" Foreground="#DC3545" Margin="0,0,0,20"/>
 
             <Button Content="Save Booking" Command="{Binding SaveCommand}" 
                     Padding="10" Background="#28A745" Foreground="White" FontWeight="Bold"/>

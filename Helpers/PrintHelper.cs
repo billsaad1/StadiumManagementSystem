@@ -17,58 +17,82 @@ namespace StadiumManagementSystem.Helpers
                 doc.PagePadding = new Thickness(50);
                 doc.FontFamily = new FontFamily("Segoe UI");
 
+                // Header Grid
+                Grid headerGrid = new Grid();
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(100) });
+                headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+                // Logo
                 if (!string.IsNullOrEmpty(settings.LogoPath) && System.IO.File.Exists(settings.LogoPath))
                 {
-                    var bitmap = new System.Windows.Media.Imaging.BitmapImage(new Uri(settings.LogoPath));
-                    var image = new Image { Source = bitmap, Width = 100, Height = 100, HorizontalAlignment = HorizontalAlignment.Center };
-                    doc.Blocks.Add(new BlockUIContainer(image));
+                    try {
+                        var bitmap = new System.Windows.Media.Imaging.BitmapImage(new Uri(settings.LogoPath));
+                        var image = new Image { Source = bitmap, Width = 80, Height = 80 };
+                        Grid.SetColumn(image, 1);
+                        headerGrid.Children.Add(image);
+                    } catch {}
                 }
 
-                Paragraph header = new Paragraph(new Run(settings.OrganizationName))
-                {
-                    FontSize = 24,
-                    FontWeight = FontWeights.Bold,
-                    TextAlignment = TextAlignment.Center
-                };
-                doc.Blocks.Add(header);
+                // Title Section
+                StackPanel leftInfo = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
+                leftInfo.Children.Add(new TextBlock { Text = settings.OrganizationName, FontSize = 20, FontWeight = FontWeights.Bold });
+                leftInfo.Children.Add(new TextBlock { Text = settings.Location, FontSize = 10 });
+                Grid.SetColumn(leftInfo, 0);
+                headerGrid.Children.Add(leftInfo);
 
-                Paragraph subHeader = new Paragraph(new Run($"{settings.Address}, {settings.Location}\nPhone: {settings.Phone} | Manager: {settings.ManagerName}"))
-                {
-                    FontSize = 12,
-                    FontStyle = FontStyles.Italic,
-                    TextAlignment = TextAlignment.Center
-                };
-                doc.Blocks.Add(subHeader);
+                StackPanel rightInfo = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Right };
+                rightInfo.Children.Add(new TextBlock { Text = "سند قبض", FontSize = 20, FontWeight = FontWeights.Bold, FlowDirection = FlowDirection.RightToLeft });
+                rightInfo.Children.Add(new TextBlock { Text = "CASH RECEIPT", FontSize = 14, FontWeight = FontWeights.SemiBold });
+                Grid.SetColumn(rightInfo, 2);
+                headerGrid.Children.Add(rightInfo);
 
-                doc.Blocks.Add(new Paragraph(new Run("--------------------------------------------------")) { TextAlignment = TextAlignment.Center });
+                doc.Blocks.Add(new BlockUIContainer(headerGrid));
+                doc.Blocks.Add(new Paragraph(new Run("----------------------------------------------------------------------------------------------------")));
 
-                Paragraph title = new Paragraph(new Run("RESERVATION RECEIPT"))
-                {
-                    FontSize = 18,
-                    FontWeight = FontWeights.Bold,
-                    TextAlignment = TextAlignment.Center,
-                    Margin = new Thickness(0, 20, 0, 20)
-                };
-                doc.Blocks.Add(title);
+                // Details Table
+                Table table = new Table { CellSpacing = 10 };
+                table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
+                table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
 
-                doc.Blocks.Add(new Paragraph(new Run($"Receipt #: {booking.BookingNumber}")));
-                doc.Blocks.Add(new Paragraph(new Run($"Date: {booking.BookingDate:d}")));
-                doc.Blocks.Add(new Paragraph(new Run($"Stadium: {booking.Stadium}")));
-                doc.Blocks.Add(new Paragraph(new Run($"Time: {booking.TimeSlot}")));
-                doc.Blocks.Add(new Paragraph(new Run($"Customer: {booking.CustomerName}")));
-                doc.Blocks.Add(new Paragraph(new Run($"Phone: {booking.CustomerPhone}")));
+                TableRowGroup group = new TableRowGroup();
 
-                doc.Blocks.Add(new Paragraph(new Run("--------------------------------------------------")));
+                group.Rows.Add(CreateRow("Receipt # / رقم السند:", booking.BookingNumber));
+                group.Rows.Add(CreateRow("Date / التاريخ:", booking.BookingDate.ToString("yyyy-MM-dd")));
+                group.Rows.Add(CreateRow("Customer / العميل:", booking.CustomerName));
+                group.Rows.Add(CreateRow("Stadium / الملعب:", booking.Stadium));
+                group.Rows.Add(CreateRow("Time / الوقت:", booking.TimeSlot));
 
-                doc.Blocks.Add(new Paragraph(new Run($"Total Price: {booking.TotalPrice} YER")) { FontWeight = FontWeights.Bold });
-                doc.Blocks.Add(new Paragraph(new Run($"Paid: {booking.Deposit} YER")));
-                doc.Blocks.Add(new Paragraph(new Run($"Balance: {booking.Balance} YER")) { Foreground = Brushes.Red });
+                table.RowGroups.Add(group);
+                doc.Blocks.Add(table);
 
-                doc.Blocks.Add(new Paragraph(new Run("\nThank you for choosing us!")) { TextAlignment = TextAlignment.Center });
+                doc.Blocks.Add(new Paragraph(new Run("----------------------------------------------------------------------------------------------------")));
+
+                // Financials
+                Section financials = new Section();
+                financials.Blocks.Add(new Paragraph(new Run($"Total Price / المبلغ الإجمالي: {booking.TotalPrice:N0} YER")) { FontSize = 14 });
+                financials.Blocks.Add(new Paragraph(new Run($"Paid Amount / المبلغ المدفوع: {booking.Deposit:N0} YER")) { FontSize = 14, FontWeight = FontWeights.Bold, Foreground = Brushes.Green });
+                financials.Blocks.Add(new Paragraph(new Run($"Remaining / المتبقي: {booking.Balance:N0} YER")) { FontSize = 14, FontWeight = FontWeights.Bold, Foreground = Brushes.Red });
+                doc.Blocks.Add(financials);
+
+                // Footer
+                doc.Blocks.Add(new Paragraph(new Run("\n\n")));
+                doc.Blocks.Add(new Paragraph(new Run("Recipient Signature / توقيع المستلم")) { TextAlignment = TextAlignment.Right, Margin = new Thickness(0,0,50,0) });
+
+                doc.Blocks.Add(new Paragraph(new Run("----------------------------------------------------------------------------------------------------")));
+                doc.Blocks.Add(new Paragraph(new Run($"{settings.Address} | Phone: {settings.Phone}")) { TextAlignment = TextAlignment.Center, FontSize = 10 });
 
                 IDocumentPaginatorSource idpSource = doc;
                 printDialog.PrintDocument(idpSource.DocumentPaginator, "Stadium Receipt");
             }
+        }
+
+        private static TableRow CreateRow(string label, string value)
+        {
+            TableRow row = new TableRow();
+            row.Cells.Add(new TableCell(new Paragraph(new Run(label)) { FontWeight = FontWeights.SemiBold }));
+            row.Cells.Add(new TableCell(new Paragraph(new Run(value))));
+            return row;
         }
 
         public static void PrintSchedule(DateTime date, string stadium, IEnumerable<ViewModels.ScheduleSlot> slots, Settings settings)

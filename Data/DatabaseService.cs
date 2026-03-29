@@ -186,7 +186,7 @@ namespace StadiumManagementSystem.Data
             connection.Open();
             var command = connection.CreateCommand();
             command.CommandText = @"
-                SELECT COUNT(*) FROM Bookings 
+                SELECT COUNT(*) FROM Bookings
                 WHERE Stadium = @s AND BookingDate = @d
                 AND StartHour <= @end AND EndHour >= @start
             ";
@@ -248,8 +248,8 @@ namespace StadiumManagementSystem.Data
                 var command = connection.CreateCommand();
                 command.Transaction = transaction;
                 command.CommandText = @"
-                    INSERT INTO Bookings (BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot, 
-                                        CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance, 
+                    INSERT INTO Bookings (BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot,
+                                        CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance,
                                         PaymentMethod, PaymentStatus, Notes, CreatedAt)
                     VALUES (@bn, @bd, @s, @sh, @eh, @d, @ts, @cid, @cn, @cp, @status, @tp, @dep, @bal, @pm, @ps, @n, @ca)
                 ";
@@ -472,6 +472,59 @@ namespace StadiumManagementSystem.Data
             var command = connection.CreateCommand();
             command.CommandText = "DELETE FROM Stadiums WHERE Id = @id";
             command.Parameters.AddWithValue("@id", id);
+            command.ExecuteNonQuery();
+        }
+
+        public Booking? GetBookingById(int id)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                SELECT Id, BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot,
+                       CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance,
+                       PaymentMethod, PaymentStatus, Notes, CreatedAt
+                FROM Bookings WHERE Id = @id";
+            command.Parameters.AddWithValue("@id", id);
+            using var reader = command.ExecuteReader();
+            if (reader.Read())
+            {
+                return new Booking
+                {
+                    Id = reader.GetInt32(0),
+                    BookingNumber = reader.GetString(1),
+                    BookingDate = DateTime.Parse(reader.GetString(2)),
+                    Stadium = reader.GetString(3),
+                    StartHour = reader.GetInt32(4),
+                    EndHour = reader.GetInt32(5),
+                    Duration = reader.GetInt32(6),
+                    TimeSlot = reader.GetString(7),
+                    CustomerId = reader.GetInt32(8),
+                    CustomerName = reader.GetString(9),
+                    CustomerPhone = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                    Status = reader.GetString(11),
+                    TotalPrice = reader.GetDecimal(12),
+                    Deposit = reader.GetDecimal(13),
+                    Balance = reader.GetDecimal(14),
+                    PaymentMethod = reader.GetString(15),
+                    PaymentStatus = reader.GetString(16),
+                    Notes = reader.IsDBNull(17) ? "" : reader.GetString(17),
+                    CreatedAt = DateTime.Parse(reader.GetString(18))
+                };
+            }
+            return null;
+        }
+
+        public void UpdateBookingPayment(int id, decimal deposit, decimal balance, string status)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE Bookings SET Deposit=@d, Balance=@b, PaymentStatus=@s WHERE Id=@id";
+            command.Parameters.AddWithValue("@id", id);
+            command.Parameters.AddWithValue("@d", deposit);
+            command.Parameters.AddWithValue("@b", balance);
+            command.Parameters.AddWithValue("@s", status);
             command.ExecuteNonQuery();
         }
     }

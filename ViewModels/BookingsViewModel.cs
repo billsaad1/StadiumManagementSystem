@@ -42,6 +42,20 @@ namespace StadiumManagementSystem.ViewModels
         }
 
         [RelayCommand]
+        private void EditBooking(Booking booking)
+        {
+            var fullBooking = App.Database.GetBookingById(booking.Id);
+            if (fullBooking == null) return;
+
+            var vm = new EditBookingViewModel(fullBooking);
+            var view = new Views.EditBookingView { DataContext = vm };
+            if (view.ShowDialog() == true)
+            {
+                LoadBookings();
+            }
+        }
+
+        [RelayCommand]
         private void SendWhatsApp(Booking booking)
         {
             if (string.IsNullOrEmpty(booking.CustomerPhone)) return;

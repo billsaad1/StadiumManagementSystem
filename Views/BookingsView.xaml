@@ -26,8 +26,9 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal">
+                                <Button Content="Edit" Command="{Binding DataContext.EditBookingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="2" Background="#FFC107" Foreground="Black" BorderThickness="0" Padding="5,2"/>
                                 <Button Content="WA" Command="{Binding DataContext.SendWhatsAppCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="2" Background="#25D366" Foreground="White" BorderThickness="0" Padding="5,2"/>
-                                <Button Content="PR" Command="{Binding DataContext.PrintReceiptCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="2" Background="#1F4E78" Foreground="White" BorderThickness="0" Padding="5,2"/>
+                                <Button Content="PR" Command="{Binding DataContext.PrintReceiptCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Margin="2" Background="{DynamicResource PrimaryColor}" Foreground="White" BorderThickness="0" Padding="5,2"/>
                             </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

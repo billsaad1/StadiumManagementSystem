@@ -34,6 +34,12 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private decimal _totalPrice;
 
+        [ObservableProperty]
+        private decimal _deposit;
+
+        [ObservableProperty]
+        private decimal _balance;
+
         private Settings _settings;
 
         public NewBookingViewModel()
@@ -47,6 +53,8 @@ namespace StadiumManagementSystem.ViewModels
         partial void OnStartHourChanged(int value) => UpdatePrice();
         partial void OnEndHourChanged(int value) => UpdatePrice();
         partial void OnSelectedStadiumChanged(Stadium? value) => UpdatePrice();
+        partial void OnDepositChanged(decimal value) => UpdateBalance();
+        partial void OnTotalPriceChanged(decimal value) => UpdateBalance();
 
         private void UpdatePrice()
         {
@@ -61,6 +69,11 @@ namespace StadiumManagementSystem.ViewModels
                     total += SelectedStadium.MorningPrice;
             }
             TotalPrice = total;
+        }
+
+        private void UpdateBalance()
+        {
+            Balance = TotalPrice - Deposit;
         }
 
         public event Action<bool>? RequestClose;
@@ -98,9 +111,9 @@ namespace StadiumManagementSystem.ViewModels
                 CustomerName = CustomerName,
                 CustomerPhone = CustomerPhone,
                 TotalPrice = TotalPrice,
-                Deposit = 0, // Simplified for now
-                Balance = TotalPrice,
-                PaymentStatus = "Pending"
+                Deposit = Deposit,
+                Balance = Balance,
+                PaymentStatus = Balance == 0 ? "Paid" : (Deposit > 0 ? "Partial" : "Pending")
             };
 
             App.Database.SaveBooking(booking);
