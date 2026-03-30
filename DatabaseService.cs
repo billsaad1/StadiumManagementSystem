@@ -83,6 +83,14 @@ namespace StadiumManagementSystem.Data
                     Notes TEXT
                 );
 
+                CREATE TABLE IF NOT EXISTS Stadiums (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Name TEXT NOT NULL UNIQUE,
+                    HourlyPrice REAL NOT NULL,
+                    IsActive INTEGER DEFAULT 1,
+                    Notes TEXT
+                );
+
                 INSERT OR IGNORE INTO Users (Username, Password, Role, FullName) 
                 VALUES ('admin', '1234', 'Admin', 'System Administrator');
 
@@ -92,6 +100,10 @@ namespace StadiumManagementSystem.Data
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium2Price', '8000');
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('ManagerName', 'Bilal Al Salami');
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Location', 'Sana''a, Yemen');
+
+                -- Default Stadiums
+                INSERT OR IGNORE INTO Stadiums (Name, HourlyPrice) VALUES ('Stadium 1', 8000);
+                INSERT OR IGNORE INTO Stadiums (Name, HourlyPrice) VALUES ('Stadium 2', 8000);
             ";
             command.ExecuteNonQuery();
         }
@@ -362,6 +374,137 @@ namespace StadiumManagementSystem.Data
             var command = connection.CreateCommand();
             command.CommandText = "DELETE FROM Expenses WHERE Id = @id";
             command.Parameters.AddWithValue("@id", id);
+            command.ExecuteNonQuery();
+        }
+
+        public List<Stadium> GetStadiums()
+        {
+            var list = new List<Stadium>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT Id, Name, HourlyPrice, IsActive, Notes FROM Stadiums";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new Stadium
+                {
+                    Id = reader.GetInt32(0),
+                    Name = reader.GetString(1),
+                    HourlyPrice = reader.GetDecimal(2),
+                    IsActive = reader.GetInt32(3) == 1,
+                    Notes = reader.IsDBNull(4) ? "" : reader.GetString(4)
+                });
+            }
+            return list;
+        }
+
+        public void SaveStadium(Stadium stadium)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                INSERT INTO Stadiums (Id, Name, HourlyPrice, IsActive, Notes)
+                VALUES (@id, @name, @price, @active, @notes)
+                ON CONFLICT(Id) DO UPDATE SET
+                    Name = excluded.Name,
+                    HourlyPrice = excluded.HourlyPrice,
+                    IsActive = excluded.IsActive,
+                    Notes = excluded.Notes;
+            ";
+            command.Parameters.AddWithValue("@id", stadium.Id == 0 ? (object)DBNull.Value : stadium.Id);
+            command.Parameters.AddWithValue("@name", stadium.Name);
+            command.Parameters.AddWithValue("@price", stadium.HourlyPrice);
+            command.Parameters.AddWithValue("@active", stadium.IsActive ? 1 : 0);
+            command.Parameters.AddWithValue("@notes", stadium.Notes ?? "");
+            command.ExecuteNonQuery();
+        }
+
+        public void DeleteStadium(int id)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM Stadiums WHERE Id = @id";
+            command.Parameters.AddWithValue("@id", id);
+            command.ExecuteNonQuery();
+        }
+
+        public List<User> GetUsers()
+        {
+            var list = new List<User>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT Id, Username, Role, FullName, IsActive, Notes FROM Users";
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new User
+                {
+                    Id = reader.GetInt32(0),
+                    Username = reader.GetString(1),
+                    Role = reader.GetString(2),
+                    FullName = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                    IsActive = reader.GetInt32(4) == 1,
+                    Notes = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                });
+            }
+            return list;
+        }
+
+        public void SaveUser(User user, string? password = null)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            if (user.Id == 0)
+            {
+                command.CommandText = @"
+                    INSERT INTO Users (Username, Password, Role, FullName, IsActive, Notes)
+                    VALUES (@u, @p, @r, @f, @a, @n)
+                ";
+                command.Parameters.AddWithValue("@p", password ?? "1234");
+            }
+            else
+            {
+                command.CommandText = @"
+                    UPDATE Users SET Username = @u, Role = @r, FullName = @f, IsActive = @a, Notes = @n
+                    " + (password != null ? ", Password = @p" : "") + @"
+                    WHERE Id = @id
+                ";
+                command.Parameters.AddWithValue("@id", user.Id);
+                if (password != null) command.Parameters.AddWithValue("@p", password);
+            }
+            command.Parameters.AddWithValue("@u", user.Username);
+            command.Parameters.AddWithValue("@r", user.Role);
+            command.Parameters.AddWithValue("@f", user.FullName ?? "");
+            command.Parameters.AddWithValue("@a", user.IsActive ? 1 : 0);
+            command.Parameters.AddWithValue("@n", user.Notes ?? "");
+            command.ExecuteNonQuery();
+        }
+
+        public void DeleteUser(int id)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM Users WHERE Id = @id AND Username != 'admin'";
+            command.Parameters.AddWithValue("@id", id);
+            command.ExecuteNonQuery();
+        }
+
+        public void UpdateBookingPayment(int bookingId, decimal deposit, decimal balance, string status)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "UPDATE Bookings SET Deposit = @d, Balance = @b, PaymentStatus = @s WHERE Id = @id";
+            command.Parameters.AddWithValue("@d", deposit);
+            command.Parameters.AddWithValue("@b", balance);
+            command.Parameters.AddWithValue("@s", status);
+            command.Parameters.AddWithValue("@id", bookingId);
             command.ExecuteNonQuery();
         }
     }

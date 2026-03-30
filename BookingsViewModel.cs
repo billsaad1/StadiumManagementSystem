@@ -43,5 +43,18 @@ namespace StadiumManagementSystem.ViewModels
                 .Any(d => d.Source != null && d.Source.OriginalString.Contains("ar.xaml"));
             PrintHelper.ShowReceiptPreview(booking, settings, isArabic);
         }
+
+        [RelayCommand]
+        private void EditBooking(Booking booking)
+        {
+            if (booking == null) return;
+            var vm = new EditBookingViewModel(booking);
+            var view = new Views.EditBookingView { DataContext = vm };
+            vm.RequestClose += (success) => { if(success) view.DialogResult = true; view.Close(); };
+            if (view.ShowDialog() == true)
+            {
+                LoadBookings();
+            }
+        }
     }
 }

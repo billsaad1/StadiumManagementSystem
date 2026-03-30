@@ -19,8 +19,9 @@ namespace StadiumManagementSystem
             if (loginView.ShowDialog() == true)
             {
                 ShutdownMode = ShutdownMode.OnMainWindowClose;
+                var vm = (LoginViewModel)loginView.DataContext;
                 var mainWindow = new MainWindow();
-                mainWindow.DataContext = new MainViewModel();
+                mainWindow.DataContext = new MainViewModel(vm.AuthenticatedUser!);
                 mainWindow.Show();
             }
             else

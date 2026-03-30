@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using StadiumManagementSystem.Models;
+using StadiumManagementSystem.Helpers;
 
 namespace StadiumManagementSystem.ViewModels
 {
@@ -70,6 +72,14 @@ namespace StadiumManagementSystem.ViewModels
                     }
                 }
             }
+        }
+
+        [RelayCommand]
+        private void PrintSchedule()
+        {
+            bool isArabic = System.Windows.Application.Current.Resources.MergedDictionaries
+                .Any(d => d.Source != null && d.Source.OriginalString.Contains("ar.xaml"));
+            PrintHelper.PrintSchedule(SelectedDate, SelectedStadium, Slots, isArabic);
         }
     }
 }

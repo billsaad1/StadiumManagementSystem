@@ -15,6 +15,9 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private string _errorMessage = string.Empty;
 
+        [ObservableProperty]
+        private User? _authenticatedUser;
+
         public event Action<User>? OnLoginSuccess;
 
         [RelayCommand]
@@ -29,6 +32,7 @@ namespace StadiumManagementSystem.ViewModels
             var user = App.Database.Authenticate(Username, password);
             if (user != null)
             {
+                AuthenticatedUser = user;
                 OnLoginSuccess?.Invoke(user);
             }
             else

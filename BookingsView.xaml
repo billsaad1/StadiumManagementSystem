@@ -25,8 +25,12 @@
                 <DataGridTemplateColumn Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Content="Print" Command="{Binding DataContext.PrintReceiptCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                    CommandParameter="{Binding}" Background="#1F4E78" Foreground="White" BorderThickness="0" Padding="10,2"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Edit" Command="{Binding DataContext.EditBookingCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" Background="#17A2B8" Foreground="White" BorderThickness="0" Padding="10,2" Margin="2"/>
+                                <Button Content="Print" Command="{Binding DataContext.PrintReceiptCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" Background="#1F4E78" Foreground="White" BorderThickness="0" Padding="10,2" Margin="2"/>
+                            </StackPanel>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

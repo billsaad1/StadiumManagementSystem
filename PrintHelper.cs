@@ -78,5 +78,49 @@ namespace StadiumManagementSystem.Helpers
             var preview = new Views.ReceiptPreviewWindow(doc);
             preview.ShowDialog();
         }
+
+        public static void PrintSchedule(DateTime date, string stadium, IEnumerable<ViewModels.ScheduleSlot> slots, bool isArabic)
+        {
+            FlowDocument doc = new FlowDocument();
+            doc.PagePadding = new Thickness(50);
+            doc.FontFamily = new FontFamily(isArabic ? "Traditional Arabic" : "Segoe UI");
+            doc.FlowDirection = isArabic ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+
+            Paragraph header = new Paragraph(new Run(isArabic ? $"جدول حجز - {stadium}" : $"Booking Schedule - {stadium}"))
+            {
+                FontSize = 24,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center
+            };
+            doc.Blocks.Add(header);
+
+            doc.Blocks.Add(new Paragraph(new Run($"{(isArabic ? "التاريخ" : "Date")}: {date:d}")) { TextAlignment = TextAlignment.Center });
+            doc.Blocks.Add(new Paragraph(new Run("--------------------------------------------------")) { TextAlignment = TextAlignment.Center });
+
+            Table table = new Table { CellSpacing = 0, BorderThickness = new Thickness(1), BorderBrush = Brushes.Black };
+            table.Columns.Add(new TableColumn { Width = new GridLength(100) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
+            table.RowGroups.Add(new TableRowGroup());
+
+            var headerRow = new TableRow { Background = Brushes.LightGray, FontWeight = FontWeights.Bold };
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run(isArabic ? "الوقت" : "Time"))) { BorderThickness = new Thickness(1), BorderBrush = Brushes.Black, Padding = new Thickness(5) });
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run(isArabic ? "الحالة" : "Status"))) { BorderThickness = new Thickness(1), BorderBrush = Brushes.Black, Padding = new Thickness(5) });
+            headerRow.Cells.Add(new TableCell(new Paragraph(new Run(isArabic ? "العميل" : "Customer"))) { BorderThickness = new Thickness(1), BorderBrush = Brushes.Black, Padding = new Thickness(5) });
+            table.RowGroups[0].Rows.Add(headerRow);
+
+            foreach (var slot in slots)
+            {
+                var row = new TableRow();
+                row.Cells.Add(new TableCell(new Paragraph(new Run(slot.TimeRange))) { BorderThickness = new Thickness(1), BorderBrush = Brushes.Black, Padding = new Thickness(5) });
+                row.Cells.Add(new TableCell(new Paragraph(new Run(slot.Status))) { BorderThickness = new Thickness(1), BorderBrush = Brushes.Black, Padding = new Thickness(5) });
+                row.Cells.Add(new TableCell(new Paragraph(new Run(slot.Customer))) { BorderThickness = new Thickness(1), BorderBrush = Brushes.Black, Padding = new Thickness(5) });
+                table.RowGroups[0].Rows.Add(row);
+            }
+            doc.Blocks.Add(table);
+
+            var preview = new Views.ReceiptPreviewWindow(doc);
+            preview.ShowDialog();
+        }
     }
 }

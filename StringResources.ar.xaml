@@ -42,4 +42,7 @@
     <system:String x:Key="CustomerPhone">رقم العميل</system:String>
     <system:String x:Key="Print">طباعة</system:String>
     <system:String x:Key="Close">إغلاق</system:String>
+    <system:String x:Key="StadiumManagement">إدارة الملاعب</system:String>
+    <system:String x:Key="UserManagement">إدارة المستخدمين</system:String>
+    <system:String x:Key="EditPayment">تعديل الدفع</system:String>
 </ResourceDictionary>

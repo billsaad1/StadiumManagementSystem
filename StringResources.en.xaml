@@ -42,4 +42,7 @@
     <system:String x:Key="CustomerPhone">Customer Phone</system:String>
     <system:String x:Key="Print">Print</system:String>
     <system:String x:Key="Close">Close</system:String>
+    <system:String x:Key="StadiumManagement">Stadium Management</system:String>
+    <system:String x:Key="UserManagement">User Management</system:String>
+    <system:String x:Key="EditPayment">Edit Payment</system:String>
 </ResourceDictionary>
