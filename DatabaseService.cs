@@ -20,6 +20,14 @@ namespace StadiumManagementSystem.Data
             connection.Open();
 
             var command = connection.CreateCommand();
+
+            // Migrate existing tables to ensure they have new columns
+            try {
+                var migrateCmd = connection.CreateCommand();
+                migrateCmd.CommandText = "ALTER TABLE Stadiums ADD COLUMN HourlyPrice REAL DEFAULT 0;";
+                migrateCmd.ExecuteNonQuery();
+            } catch { /* Column already exists or table doesn't exist yet */ }
+
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Users (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
