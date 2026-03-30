@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StadiumManagementSystem.Models;
+using System.Collections.ObjectModel;
 
 namespace StadiumManagementSystem.ViewModels
 {
@@ -27,6 +28,18 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private decimal _totalPrice;
 
+        [ObservableProperty]
+        private decimal _deposit;
+
+        [ObservableProperty]
+        private decimal _balance;
+
+        [ObservableProperty]
+        private string _paymentMethod = "Cash";
+
+        [ObservableProperty]
+        private ObservableCollection<string> _paymentMethods = new() { "Cash", "Bank Transfer", "Mobile Money" };
+
         private Settings _settings;
 
         public NewBookingViewModel()
@@ -38,13 +51,20 @@ namespace StadiumManagementSystem.ViewModels
         partial void OnStartHourChanged(int value) => UpdatePrice();
         partial void OnEndHourChanged(int value) => UpdatePrice();
         partial void OnStadiumChanged(string value) => UpdatePrice();
+        partial void OnTotalPriceChanged(decimal value) => UpdateBalance();
+        partial void OnDepositChanged(decimal value) => UpdateBalance();
 
         private void UpdatePrice()
         {
             int duration = EndHour - StartHour + 1;
             if (duration < 1) duration = 0;
-            decimal pricePerHour = Stadium.Contains("1") ? _settings.Stadium1Price : _settings.Stadium2Price;
+            decimal pricePerHour = (Stadium != null && Stadium.Contains("1")) ? _settings.Stadium1Price : _settings.Stadium2Price;
             TotalPrice = duration * pricePerHour;
+        }
+
+        private void UpdateBalance()
+        {
+            Balance = TotalPrice - Deposit;
         }
 
         public event Action<bool>? RequestClose;
@@ -82,9 +102,10 @@ namespace StadiumManagementSystem.ViewModels
                 CustomerName = CustomerName,
                 CustomerPhone = CustomerPhone,
                 TotalPrice = TotalPrice,
-                Deposit = 0, // Simplified for now
-                Balance = TotalPrice,
-                PaymentStatus = "Pending"
+                Deposit = Deposit,
+                Balance = Balance,
+                PaymentMethod = PaymentMethod,
+                PaymentStatus = Balance <= 0 ? "Paid" : (Deposit > 0 ? "Partial" : "Pending")
             };
 
             App.Database.SaveBooking(booking);

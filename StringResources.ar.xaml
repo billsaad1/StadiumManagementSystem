@@ -12,7 +12,7 @@
     <system:String x:Key="Financials">المالية</system:String>
     <system:String x:Key="Settings">الإعدادات</system:String>
     <system:String x:Key="Logout">تسجيل الخروج</system:String>
-    <system:String x:Key="FlowDirection">RightToLeft</system:String>
+    <FlowDirection x:Key="FlowDirection">RightToLeft</FlowDirection>
     <system:String x:Key="BookingsToday">حجوزات اليوم</system:String>
     <system:String x:Key="RevenueToday">إيرادات اليوم</system:String>
     <system:String x:Key="AvailableSlots">الفتحات المتاحة</system:String>
@@ -23,4 +23,23 @@
     <system:String x:Key="OrganizationName">اسم المنظمة</system:String>
     <system:String x:Key="ManagerName">اسم المدير</system:String>
     <system:String x:Key="Location">الموقع</system:String>
+    <system:String x:Key="Expenses">المصاريف</system:String>
+    <system:String x:Key="AddExpense">إضافة مصروف</system:String>
+    <system:String x:Key="Description">الوصف</system:String>
+    <system:String x:Key="Category">الفئة</system:String>
+    <system:String x:Key="Amount">المبلغ</system:String>
+    <system:String x:Key="Date">التاريخ</system:String>
+    <system:String x:Key="NetProfit">صافي الربح</system:String>
+    <system:String x:Key="TotalExpenses">إجمالي المصاريف</system:String>
+    <system:String x:Key="DailyClosing">الإغلاق اليومي</system:String>
+    <system:String x:Key="PaymentMethod">طريقة الدفع</system:String>
+    <system:String x:Key="Cash">نقداً</system:String>
+    <system:String x:Key="BankTransfer">تحويل بنكي</system:String>
+    <system:String x:Key="MobileMoney">محفظة إلكترونية</system:String>
+    <system:String x:Key="Deposit">المقدم</system:String>
+    <system:String x:Key="Balance">المتبقي</system:String>
+    <system:String x:Key="TotalPrice">السعر الإجمالي</system:String>
+    <system:String x:Key="CustomerPhone">رقم العميل</system:String>
+    <system:String x:Key="Print">طباعة</system:String>
+    <system:String x:Key="Close">إغلاق</system:String>
 </ResourceDictionary>

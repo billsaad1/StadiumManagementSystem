@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using StadiumManagementSystem.Models;
+using StadiumManagementSystem.Helpers;
 using System.Collections.ObjectModel;
 
 namespace StadiumManagementSystem.ViewModels
@@ -26,10 +27,21 @@ namespace StadiumManagementSystem.ViewModels
         {
             var vm = new NewBookingViewModel();
             var view = new Views.NewBookingView { DataContext = vm };
+            vm.RequestClose += (success) => { if(success) view.DialogResult = true; view.Close(); };
             if (view.ShowDialog() == true)
             {
                 LoadBookings();
             }
+        }
+
+        [RelayCommand]
+        private void PrintReceipt(Booking booking)
+        {
+            if (booking == null) return;
+            var settings = App.Database.GetSettings();
+            bool isArabic = System.Windows.Application.Current.Resources.MergedDictionaries
+                .Any(d => d.Source != null && d.Source.OriginalString.Contains("ar.xaml"));
+            PrintHelper.ShowReceiptPreview(booking, settings, isArabic);
         }
     }
 }

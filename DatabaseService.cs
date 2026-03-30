@@ -74,6 +74,15 @@ namespace StadiumManagementSystem.Data
                     Value TEXT
                 );
 
+                CREATE TABLE IF NOT EXISTS Expenses (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Description TEXT NOT NULL,
+                    Category TEXT,
+                    Amount REAL NOT NULL,
+                    Date TEXT NOT NULL,
+                    Notes TEXT
+                );
+
                 INSERT OR IGNORE INTO Users (Username, Password, Role, FullName) 
                 VALUES ('admin', '1234', 'Admin', 'System Administrator');
 
@@ -156,7 +165,7 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Users WHERE Username = @u AND Password = @p AND IsActive = 1";
+            command.CommandText = "SELECT Id, Username, Role, FullName FROM Users WHERE Username = @u AND Password = @p AND IsActive = 1";
             command.Parameters.AddWithValue("@u", username);
             command.Parameters.AddWithValue("@p", password);
             using var reader = command.ExecuteReader();
@@ -166,8 +175,8 @@ namespace StadiumManagementSystem.Data
                 {
                     Id = reader.GetInt32(0),
                     Username = reader.GetString(1),
-                    Role = reader.GetString(3),
-                    FullName = reader.IsDBNull(4) ? "" : reader.GetString(4)
+                    Role = reader.GetString(2),
+                    FullName = reader.IsDBNull(3) ? "" : reader.GetString(3)
                 };
             }
             return null;
@@ -242,7 +251,10 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Bookings ORDER BY CreatedAt DESC";
+            command.CommandText = @"SELECT Id, BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot,
+                                          CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance,
+                                          PaymentMethod, PaymentStatus, Notes, CreatedAt
+                                   FROM Bookings ORDER BY CreatedAt DESC";
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -252,10 +264,21 @@ namespace StadiumManagementSystem.Data
                     BookingNumber = reader.GetString(1),
                     BookingDate = DateTime.Parse(reader.GetString(2)),
                     Stadium = reader.GetString(3),
+                    StartHour = reader.GetInt32(4),
+                    EndHour = reader.GetInt32(5),
+                    Duration = reader.GetInt32(6),
                     TimeSlot = reader.GetString(7),
+                    CustomerId = reader.GetInt32(8),
                     CustomerName = reader.GetString(9),
+                    CustomerPhone = reader.GetString(10),
+                    Status = reader.GetString(11),
                     TotalPrice = reader.GetDecimal(12),
-                    PaymentStatus = reader.GetString(15)
+                    Deposit = reader.GetDecimal(13),
+                    Balance = reader.GetDecimal(14),
+                    PaymentMethod = reader.GetString(15),
+                    PaymentStatus = reader.GetString(16),
+                    Notes = reader.IsDBNull(17) ? "" : reader.GetString(17),
+                    CreatedAt = DateTime.Parse(reader.GetString(18))
                 });
             }
             return list;
@@ -267,7 +290,7 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM Customers ORDER BY TotalSpent DESC";
+            command.CommandText = "SELECT Id, Name, Phone, Email, Address, Type, RegistrationDate, TotalBookings, TotalSpent, LastBooking, Notes, IsActive FROM Customers ORDER BY TotalSpent DESC";
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -275,12 +298,71 @@ namespace StadiumManagementSystem.Data
                 {
                     Id = reader.GetInt32(0),
                     Name = reader.GetString(1),
-                    Phone = reader.GetString(2),
+                    Phone = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                    Address = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    Type = reader.GetString(5),
+                    RegistrationDate = DateTime.Parse(reader.GetString(6)),
                     TotalBookings = reader.GetInt32(7),
-                    TotalSpent = reader.GetDecimal(8)
+                    TotalSpent = reader.GetDecimal(8),
+                    LastBooking = reader.IsDBNull(9) ? null : DateTime.Parse(reader.GetString(9)),
+                    Notes = reader.IsDBNull(10) ? "" : reader.GetString(10),
+                    IsActive = reader.GetInt32(11) == 1
                 });
             }
             return list;
+        }
+
+        public void SaveExpense(Expense expense)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                INSERT INTO Expenses (Description, Category, Amount, Date, Notes)
+                VALUES (@desc, @cat, @amt, @date, @notes)
+            ";
+            command.Parameters.AddWithValue("@desc", expense.Description);
+            command.Parameters.AddWithValue("@cat", expense.Category);
+            command.Parameters.AddWithValue("@amt", expense.Amount);
+            command.Parameters.AddWithValue("@date", expense.Date.ToString("yyyy-MM-dd"));
+            command.Parameters.AddWithValue("@notes", expense.Notes);
+            command.ExecuteNonQuery();
+        }
+
+        public List<Expense> GetExpenses(DateTime start, DateTime end)
+        {
+            var list = new List<Expense>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT Id, Description, Category, Amount, Date, Notes FROM Expenses WHERE Date BETWEEN @s AND @e ORDER BY Date DESC";
+            command.Parameters.AddWithValue("@s", start.ToString("yyyy-MM-dd"));
+            command.Parameters.AddWithValue("@e", end.ToString("yyyy-MM-dd"));
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new Expense
+                {
+                    Id = reader.GetInt32(0),
+                    Description = reader.GetString(1),
+                    Category = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                    Amount = reader.GetDecimal(3),
+                    Date = DateTime.Parse(reader.GetString(4)),
+                    Notes = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                });
+            }
+            return list;
+        }
+
+        public void DeleteExpense(int id)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM Expenses WHERE Id = @id";
+            command.Parameters.AddWithValue("@id", id);
+            command.ExecuteNonQuery();
         }
     }
 }

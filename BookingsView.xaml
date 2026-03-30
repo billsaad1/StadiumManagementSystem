@@ -20,8 +20,16 @@
                 <DataGridTextColumn Header="Stadium" Binding="{Binding Stadium}" Width="*"/>
                 <DataGridTextColumn Header="Time Slot" Binding="{Binding TimeSlot}" Width="*"/>
                 <DataGridTextColumn Header="Customer" Binding="{Binding CustomerName}" Width="*"/>
-                <DataGridTextColumn Header="Total" Binding="{Binding TotalPrice, StringFormat='{}{0} YER'}" Width="*"/>
+                <DataGridTextColumn Header="Total" Binding="{Binding TotalPrice, StringFormat='{}{0:N0} YER'}" Width="*"/>
                 <DataGridTextColumn Header="Status" Binding="{Binding PaymentStatus}" Width="*"/>
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Print" Command="{Binding DataContext.PrintReceiptCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}" Background="#1F4E78" Foreground="White" BorderThickness="0" Padding="10,2"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -12,7 +12,7 @@
     <system:String x:Key="Financials">Financials</system:String>
     <system:String x:Key="Settings">Settings</system:String>
     <system:String x:Key="Logout">Logout</system:String>
-    <system:String x:Key="FlowDirection">LeftToRight</system:String>
+    <FlowDirection x:Key="FlowDirection">LeftToRight</FlowDirection>
     <system:String x:Key="BookingsToday">Bookings Today</system:String>
     <system:String x:Key="RevenueToday">Revenue Today</system:String>
     <system:String x:Key="AvailableSlots">Available Slots</system:String>
@@ -23,4 +23,23 @@
     <system:String x:Key="OrganizationName">Organization Name</system:String>
     <system:String x:Key="ManagerName">Manager Name</system:String>
     <system:String x:Key="Location">Location</system:String>
+    <system:String x:Key="Expenses">Expenses</system:String>
+    <system:String x:Key="AddExpense">Add Expense</system:String>
+    <system:String x:Key="Description">Description</system:String>
+    <system:String x:Key="Category">Category</system:String>
+    <system:String x:Key="Amount">Amount</system:String>
+    <system:String x:Key="Date">Date</system:String>
+    <system:String x:Key="NetProfit">Net Profit</system:String>
+    <system:String x:Key="TotalExpenses">Total Expenses</system:String>
+    <system:String x:Key="DailyClosing">Daily Closing</system:String>
+    <system:String x:Key="PaymentMethod">Payment Method</system:String>
+    <system:String x:Key="Cash">Cash</system:String>
+    <system:String x:Key="BankTransfer">Bank Transfer</system:String>
+    <system:String x:Key="MobileMoney">Mobile Money</system:String>
+    <system:String x:Key="Deposit">Deposit</system:String>
+    <system:String x:Key="Balance">Balance</system:String>
+    <system:String x:Key="TotalPrice">Total Price</system:String>
+    <system:String x:Key="CustomerPhone">Customer Phone</system:String>
+    <system:String x:Key="Print">Print</system:String>
+    <system:String x:Key="Close">Close</system:String>
 </ResourceDictionary>

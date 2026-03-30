@@ -15,8 +15,16 @@
                 <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
                 <DataGridTextColumn Header="Phone" Binding="{Binding Phone}" Width="*"/>
                 <DataGridTextColumn Header="Total Bookings" Binding="{Binding TotalBookings}" Width="*"/>
-                <DataGridTextColumn Header="Total Spent" Binding="{Binding TotalSpent, StringFormat='{}{0} YER'}" Width="*"/>
+                <DataGridTextColumn Header="Total Spent" Binding="{Binding TotalSpent, StringFormat='{}{0:N0} YER'}" Width="*"/>
                 <DataGridTextColumn Header="Last Booking" Binding="{Binding LastBooking, StringFormat=d}" Width="*"/>
+                <DataGridTemplateColumn Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Statement" Command="{Binding DataContext.PrintStatementCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}" Background="#17A2B8" Foreground="White" BorderThickness="0" Padding="10,2"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

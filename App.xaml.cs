@@ -13,9 +13,12 @@ namespace StadiumManagementSystem
         {
             Database = new DatabaseService();
 
+            ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
             var loginView = new LoginView();
             if (loginView.ShowDialog() == true)
             {
+                ShutdownMode = ShutdownMode.OnMainWindowClose;
                 var mainWindow = new MainWindow();
                 mainWindow.DataContext = new MainViewModel();
                 mainWindow.Show();

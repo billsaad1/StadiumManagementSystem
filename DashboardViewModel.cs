@@ -51,12 +51,15 @@ namespace StadiumManagementSystem.ViewModels
             var last7Days = Enumerable.Range(-6, 7).Select(i => today.AddDays(i)).ToList();
             var revenueData = last7Days.Select(day => allBookings.Where(b => b.BookingDate.Date == day.Date).Sum(b => b.TotalPrice)).ToArray();
 
+            bool isArabic = System.Windows.Application.Current.Resources.MergedDictionaries
+                .Any(d => d.Source != null && d.Source.OriginalString.Contains("ar.xaml"));
+
             RevenueSeries = new ISeries[]
             {
                 new ColumnSeries<decimal>
                 {
                     Values = revenueData,
-                    Name = "Revenue"
+                    Name = isArabic ? ReverseArabic("Revenue") : "Revenue"
                 }
             };
 
@@ -64,9 +67,19 @@ namespace StadiumManagementSystem.ViewModels
             {
                 new Axis
                 {
-                    Labels = last7Days.Select(d => d.ToString("ddd")).ToArray()
+                    Labels = last7Days.Select(d =>
+                    {
+                        string label = d.ToString("ddd");
+                        return isArabic ? ReverseArabic(label) : label;
+                    }).ToArray()
                 }
             };
+        }
+
+        private string ReverseArabic(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+            return new string(text.Reverse().ToArray());
         }
 
         [RelayCommand]

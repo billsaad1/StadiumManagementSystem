@@ -14,22 +14,81 @@
             <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,10,0"/>
             <DatePicker SelectedDate="{Binding StartDate}" Width="150" Margin="0,0,20,0"/>
             <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,10,0"/>
-            <DatePicker SelectedDate="{Binding EndDate}" Width="150"/>
+            <DatePicker SelectedDate="{Binding EndDate}" Width="150" Margin="0,0,20,0"/>
+            <Button Content="{DynamicResource DailyClosing}" Command="{Binding PrintDailyClosingCommand}" Padding="15,5" Background="#17A2B8" Foreground="White" BorderThickness="0"/>
         </StackPanel>
 
-        <UniformGrid Grid.Row="2" Columns="2" VerticalAlignment="Top" Height="150">
-            <Border Background="White" Margin="0,0,10,0" Padding="20" CornerRadius="8" Effect="{StaticResource CardShadow}">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="Bookings in Range" Foreground="Gray" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding TotalBookings}" FontSize="36" FontWeight="Bold" Foreground="#1F4E78" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-            <Border Background="White" Margin="10,0,0,0" Padding="20" CornerRadius="8" Effect="{StaticResource CardShadow}">
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock Text="Revenue in Range" Foreground="Gray" HorizontalAlignment="Center"/>
-                    <TextBlock Text="{Binding TotalRevenue, StringFormat='{}{0:N0} YER'}" FontSize="36" FontWeight="Bold" Foreground="#28A745" HorizontalAlignment="Center"/>
-                </StackPanel>
-            </Border>
-        </UniformGrid>
+        <ScrollViewer Grid.Row="2">
+            <StackPanel>
+                <!-- Summary Cards -->
+                <UniformGrid Columns="3" Height="120" Margin="0,0,0,20">
+                    <Border Background="White" Margin="0,0,10,0" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="{DynamicResource RevenueToday}" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalRevenue, StringFormat='{}{0:N0} YER'}" FontSize="24" FontWeight="Bold" Foreground="#28A745" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="White" Margin="5,0,5,0" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="{DynamicResource TotalExpenses}" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalExpenses, StringFormat='{}{0:N0} YER'}" FontSize="24" FontWeight="Bold" Foreground="#DC3545" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="White" Margin="10,0,0,0" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="{DynamicResource NetProfit}" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding NetProfit, StringFormat='{}{0:N0} YER'}" FontSize="24" FontWeight="Bold" Foreground="#1F4E78" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <!-- Expense Management -->
+                <TextBlock Text="{DynamicResource Expenses}" FontSize="20" FontWeight="Bold" Foreground="#1F4E78" Margin="0,10,0,10"/>
+
+                <Border Background="White" Padding="15" CornerRadius="8" Margin="0,0,0,20">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="5">
+                                <TextBlock Text="{DynamicResource Description}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding NewExpenseDescription}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="5">
+                                <TextBlock Text="{DynamicResource Category}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding NewExpenseCategory}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="5">
+                                <TextBlock Text="{DynamicResource Amount}" Margin="0,0,0,5"/>
+                                <TextBox Text="{Binding NewExpenseAmount}"/>
+                            </StackPanel>
+                            <Button Grid.Column="3" Content="{DynamicResource AddExpense}" Command="{Binding AddExpenseCommand}"
+                                    Background="#28A745" Foreground="White" Padding="20,10" VerticalAlignment="Bottom" Margin="5"/>
+                        </Grid>
+
+                        <DataGrid ItemsSource="{Binding Expenses}" AutoGenerateColumns="False" Margin="0,15,0,0" CanUserAddRows="False" Height="200">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="{DynamicResource Date}" Binding="{Binding Date, StringFormat='d'}" Width="*"/>
+                                <DataGridTextColumn Header="{DynamicResource Description}" Binding="{Binding Description}" Width="2*"/>
+                                <DataGridTextColumn Header="{DynamicResource Category}" Binding="{Binding Category}" Width="*"/>
+                                <DataGridTextColumn Header="{DynamicResource Amount}" Binding="{Binding Amount, StringFormat='N0'}" Width="*"/>
+                                <DataGridTemplateColumn Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="Delete" Command="{Binding DataContext.DeleteExpenseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}" Background="#DC3545" Foreground="White" BorderThickness="0"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </UserControl>
