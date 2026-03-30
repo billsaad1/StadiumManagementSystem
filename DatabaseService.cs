@@ -118,6 +118,19 @@ namespace StadiumManagementSystem.Data
                 catch { /* Column already exists */ }
             }
 
+            // Migration for Expenses (ensure all columns exist)
+            string[] expenseColumns = { "Category TEXT", "Amount REAL", "ExpenseDate TEXT", "Description TEXT", "CreatedBy TEXT" };
+            foreach (var col in expenseColumns)
+            {
+                try
+                {
+                    var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = $"ALTER TABLE Expenses ADD COLUMN {col};";
+                    alterCmd.ExecuteNonQuery();
+                }
+                catch { /* Column already exists */ }
+            }
+
             string[] bookingColumns = { "Deposit REAL DEFAULT 0", "Balance REAL DEFAULT 0", "PaymentStatus TEXT DEFAULT 'Pending'" };
             foreach (var col in bookingColumns)
             {
