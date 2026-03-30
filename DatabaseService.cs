@@ -118,6 +118,18 @@ namespace StadiumManagementSystem.Data
                 catch { /* Column already exists */ }
             }
 
+            string[] bookingColumns = { "Deposit REAL DEFAULT 0", "Balance REAL DEFAULT 0", "PaymentStatus TEXT DEFAULT 'Pending'" };
+            foreach (var col in bookingColumns)
+            {
+                try
+                {
+                    var alterCmd = connection.CreateCommand();
+                    alterCmd.CommandText = $"ALTER TABLE Bookings ADD COLUMN {col};";
+                    alterCmd.ExecuteNonQuery();
+                }
+                catch { /* Column already exists */ }
+            }
+
             // 3. Default data and migrations
             command.CommandText = @"
                 INSERT OR IGNORE INTO Users (Username, Password, Role, FullName) 
