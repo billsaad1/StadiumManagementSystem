@@ -21,7 +21,7 @@
     <system:String x:Key="Clear">Clear</system:String>
     <system:String x:Key="Settings">Settings</system:String>
     <system:String x:Key="Logout">Logout</system:String>
-    <FlowDirection x:Key="FlowDirection">LeftToRight</FlowDirection>
+    <system:String x:Key="FlowDirection">LeftToRight</system:String>
     <system:String x:Key="BookingsToday">Bookings Today</system:String>
     <system:String x:Key="RevenueToday">Revenue Today</system:String>
     <system:String x:Key="AvailableSlots">Available Slots</system:String>

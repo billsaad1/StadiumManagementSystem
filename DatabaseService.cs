@@ -19,132 +19,72 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
 
-            var command = connection.CreateCommand();
-            
-            // 1. Create tables with all columns
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Users (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Username TEXT NOT NULL UNIQUE,
-                    Password TEXT NOT NULL,
-                    Role TEXT NOT NULL,
-                    FullName TEXT,
-                    IsActive INTEGER DEFAULT 1,
-                    Notes TEXT
-                );
+            // 1. Core Tables Creation
+            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Users (Id INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT NOT NULL UNIQUE, Password TEXT NOT NULL, Role TEXT NOT NULL);");
+            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Customers (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL, Phone TEXT UNIQUE);");
+            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Bookings (Id INTEGER PRIMARY KEY AUTOINCREMENT, BookingNumber TEXT UNIQUE);");
+            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Settings (Key TEXT PRIMARY KEY, Value TEXT);");
+            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Stadiums (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL);");
+            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Payments (Id INTEGER PRIMARY KEY AUTOINCREMENT, BookingId INTEGER NOT NULL, Amount REAL NOT NULL, PaymentDate TEXT NOT NULL, FOREIGN KEY(BookingId) REFERENCES Bookings(Id));");
+            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Expenses (Id INTEGER PRIMARY KEY AUTOINCREMENT, Category TEXT NOT NULL, Amount REAL NOT NULL, ExpenseDate TEXT NOT NULL);");
 
-                CREATE TABLE IF NOT EXISTS Customers (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Name TEXT NOT NULL,
-                    Phone TEXT UNIQUE,
-                    Email TEXT,
-                    Address TEXT,
-                    Type TEXT DEFAULT 'Regular',
-                    RegistrationDate TEXT,
-                    TotalBookings INTEGER DEFAULT 0,
-                    TotalSpent REAL DEFAULT 0,
-                    LastBooking TEXT,
-                    Notes TEXT,
-                    IsActive INTEGER DEFAULT 1
-                );
+            // 2. Incremental Migration Safety (One column at a time)
+            // Users
+            AddColumnIfMissing(connection, "Users", "FullName", "TEXT");
+            AddColumnIfMissing(connection, "Users", "IsActive", "INTEGER DEFAULT 1");
+            AddColumnIfMissing(connection, "Users", "Notes", "TEXT");
 
-                CREATE TABLE IF NOT EXISTS Bookings (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    BookingNumber TEXT UNIQUE,
-                    BookingDate TEXT,
-                    Stadium TEXT,
-                    StartHour INTEGER,
-                    EndHour INTEGER,
-                    Duration INTEGER,
-                    TimeSlot TEXT,
-                    CustomerId INTEGER,
-                    CustomerName TEXT,
-                    CustomerPhone TEXT,
-                    Status TEXT,
-                    TotalPrice REAL,
-                    Deposit REAL,
-                    Balance REAL,
-                    PaymentMethod TEXT,
-                    PaymentStatus TEXT,
-                    Notes TEXT,
-                    CreatedAt TEXT,
-                    FOREIGN KEY(CustomerId) REFERENCES Customers(Id)
-                );
+            // Customers
+            AddColumnIfMissing(connection, "Customers", "Email", "TEXT");
+            AddColumnIfMissing(connection, "Customers", "Address", "TEXT");
+            AddColumnIfMissing(connection, "Customers", "Type", "TEXT DEFAULT 'Regular'");
+            AddColumnIfMissing(connection, "Customers", "RegistrationDate", "TEXT");
+            AddColumnIfMissing(connection, "Customers", "TotalBookings", "INTEGER DEFAULT 0");
+            AddColumnIfMissing(connection, "Customers", "TotalSpent", "REAL DEFAULT 0");
+            AddColumnIfMissing(connection, "Customers", "LastBooking", "TEXT");
+            AddColumnIfMissing(connection, "Customers", "Notes", "TEXT");
+            AddColumnIfMissing(connection, "Customers", "IsActive", "INTEGER DEFAULT 1");
 
-                CREATE TABLE IF NOT EXISTS Settings (
-                    Key TEXT PRIMARY KEY,
-                    Value TEXT
-                );
+            // Bookings
+            AddColumnIfMissing(connection, "Bookings", "BookingDate", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "Stadium", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "StartHour", "INTEGER");
+            AddColumnIfMissing(connection, "Bookings", "EndHour", "INTEGER");
+            AddColumnIfMissing(connection, "Bookings", "Duration", "INTEGER");
+            AddColumnIfMissing(connection, "Bookings", "TimeSlot", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "CustomerId", "INTEGER");
+            AddColumnIfMissing(connection, "Bookings", "CustomerName", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "CustomerPhone", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "Status", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "TotalPrice", "REAL");
+            AddColumnIfMissing(connection, "Bookings", "Deposit", "REAL DEFAULT 0");
+            AddColumnIfMissing(connection, "Bookings", "Balance", "REAL DEFAULT 0");
+            AddColumnIfMissing(connection, "Bookings", "PaymentMethod", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "PaymentStatus", "TEXT DEFAULT 'Pending'");
+            AddColumnIfMissing(connection, "Bookings", "Notes", "TEXT");
+            AddColumnIfMissing(connection, "Bookings", "CreatedAt", "TEXT");
 
-                CREATE TABLE IF NOT EXISTS Stadiums (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Name TEXT NOT NULL,
-                    MorningPrice REAL,
-                    EveningPrice REAL,
-                    IsActive INTEGER DEFAULT 1
-                );
+            // Stadiums
+            AddColumnIfMissing(connection, "Stadiums", "MorningPrice", "REAL");
+            AddColumnIfMissing(connection, "Stadiums", "EveningPrice", "REAL");
+            AddColumnIfMissing(connection, "Stadiums", "IsActive", "INTEGER DEFAULT 1");
 
-                CREATE TABLE IF NOT EXISTS Payments (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    BookingId INTEGER NOT NULL,
-                    Amount REAL NOT NULL,
-                    PaymentDate TEXT NOT NULL,
-                    PaymentMethod TEXT,
-                    Notes TEXT,
-                    FOREIGN KEY(BookingId) REFERENCES Bookings(Id)
-                );
+            // Payments
+            AddColumnIfMissing(connection, "Payments", "BookingId", "INTEGER");
+            AddColumnIfMissing(connection, "Payments", "Amount", "REAL");
+            AddColumnIfMissing(connection, "Payments", "PaymentDate", "TEXT");
+            AddColumnIfMissing(connection, "Payments", "PaymentMethod", "TEXT");
+            AddColumnIfMissing(connection, "Payments", "Notes", "TEXT");
 
-                CREATE TABLE IF NOT EXISTS Expenses (
-                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    Category TEXT NOT NULL,
-                    Amount REAL NOT NULL,
-                    ExpenseDate TEXT NOT NULL,
-                    Description TEXT,
-                    CreatedBy TEXT
-                );
-            ";
-            command.ExecuteNonQuery();
-
-            // 2. Ensure columns exist for older databases (ALTER TABLE)
-            string[] userColumns = { "FullName TEXT", "IsActive INTEGER DEFAULT 1", "Notes TEXT" };
-            foreach (var col in userColumns)
-            {
-                try
-                {
-                    var alterCmd = connection.CreateCommand();
-                    alterCmd.CommandText = $"ALTER TABLE Users ADD COLUMN {col};";
-                    alterCmd.ExecuteNonQuery();
-                }
-                catch { /* Column already exists */ }
-            }
-
-            // Migration for Expenses (ensure all columns exist)
-            string[] expenseColumns = { "Category TEXT", "Amount REAL", "ExpenseDate TEXT", "Description TEXT", "CreatedBy TEXT" };
-            foreach (var col in expenseColumns)
-            {
-                try
-                {
-                    var alterCmd = connection.CreateCommand();
-                    alterCmd.CommandText = $"ALTER TABLE Expenses ADD COLUMN {col};";
-                    alterCmd.ExecuteNonQuery();
-                }
-                catch { /* Column already exists */ }
-            }
-
-            string[] bookingColumns = { "Deposit REAL DEFAULT 0", "Balance REAL DEFAULT 0", "PaymentStatus TEXT DEFAULT 'Pending'" };
-            foreach (var col in bookingColumns)
-            {
-                try
-                {
-                    var alterCmd = connection.CreateCommand();
-                    alterCmd.CommandText = $"ALTER TABLE Bookings ADD COLUMN {col};";
-                    alterCmd.ExecuteNonQuery();
-                }
-                catch { /* Column already exists */ }
-            }
+            // Expenses
+            AddColumnIfMissing(connection, "Expenses", "Category", "TEXT");
+            AddColumnIfMissing(connection, "Expenses", "Amount", "REAL");
+            AddColumnIfMissing(connection, "Expenses", "ExpenseDate", "TEXT");
+            AddColumnIfMissing(connection, "Expenses", "Description", "TEXT");
+            AddColumnIfMissing(connection, "Expenses", "CreatedBy", "TEXT");
 
             // 3. Default data and migrations
-            command.CommandText = @"
+            ExecuteNonQuery(connection, @"
                 INSERT OR IGNORE INTO Users (Username, Password, Role, FullName) 
                 VALUES ('admin', '1234', 'Admin', 'System Administrator');
 
@@ -167,8 +107,7 @@ namespace StadiumManagementSystem.Data
                 INSERT OR IGNORE INTO Stadiums (Name, MorningPrice, EveningPrice)
                 SELECT 'Stadium 2', CAST(Value AS REAL), CAST(Value AS REAL) FROM Settings WHERE Key = 'Stadium2Price'
                 AND NOT EXISTS (SELECT 1 FROM Stadiums WHERE Name = 'Stadium 2');
-            ";
-            command.ExecuteNonQuery();
+            ");
         }
 
         public Settings GetSettings()
@@ -728,6 +667,40 @@ namespace StadiumManagementSystem.Data
             command.CommandText = "DELETE FROM Expenses WHERE Id = @id";
             command.Parameters.AddWithValue("@id", id);
             command.ExecuteNonQuery();
+        }
+
+        private void ExecuteNonQuery(SqliteConnection connection, string sql)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
+        }
+
+        private void AddColumnIfMissing(SqliteConnection connection, string tableName, string columnName, string columnType)
+        {
+            try
+            {
+                using var checkCmd = connection.CreateCommand();
+                checkCmd.CommandText = $"PRAGMA table_info({tableName});";
+                bool exists = false;
+                using (var reader = checkCmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        if (reader.GetString(1).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!exists)
+                {
+                    ExecuteNonQuery(connection, $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnType};");
+                }
+            }
+            catch { /* Best effort */ }
         }
     }
 }
