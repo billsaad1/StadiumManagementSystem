@@ -17,10 +17,7 @@
                 <DatePicker SelectedDate="{Binding BookingDate}" Margin="0,0,0,15"/>
 
                 <TextBlock Text="{DynamicResource Schedule}" Margin="0,0,0,5"/>
-                <ComboBox SelectedValue="{Binding Stadium}" Margin="0,0,0,15" SelectedValuePath="Content">
-                    <ComboBoxItem Content="Stadium 1"/>
-                    <ComboBoxItem Content="Stadium 2"/>
-                </ComboBox>
+                <ComboBox ItemsSource="{Binding Stadiums}" SelectedValue="{Binding Stadium}" Margin="0,0,0,15" SelectedValuePath="Name" DisplayMemberPath="Name"/>
 
                 <Grid Margin="0,0,0,15">
                     <Grid.ColumnDefinitions>

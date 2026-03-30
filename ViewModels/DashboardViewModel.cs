@@ -4,6 +4,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using System.Collections.ObjectModel;
 using StadiumManagementSystem.Models;
+using System.Linq;
 
 namespace StadiumManagementSystem.ViewModels
 {

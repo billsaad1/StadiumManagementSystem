@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using StadiumManagementSystem.Models;
 using StadiumManagementSystem.Helpers;
+using System.Linq;
 
 namespace StadiumManagementSystem.ViewModels
 {
@@ -34,10 +35,16 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private string _selectedStadium = "Stadium 1";
 
+        [ObservableProperty]
+        private ObservableCollection<Stadium> _stadiums = new();
+
         public ObservableCollection<ScheduleSlot> Slots { get; } = new();
 
         public ScheduleViewModel()
         {
+            Stadiums = new ObservableCollection<Stadium>(App.Database.GetStadiums());
+            if (Stadiums.Any()) SelectedStadium = Stadiums[0].Name;
+
             for (int i = 1; i <= 24; i++)
             {
                 Slots.Add(new ScheduleSlot { Hour = i, TimeRange = $"{i:D2}:00 - {(i + 1):D2}:00" });

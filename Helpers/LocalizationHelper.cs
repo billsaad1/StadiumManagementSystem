@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Linq;
 
 namespace StadiumManagementSystem.Helpers
 {
@@ -10,10 +11,10 @@ namespace StadiumManagementSystem.Helpers
             switch (languageCode)
             {
                 case "ar":
-                    dict.Source = new Uri("..\\Resources\\StringResources.ar.xaml", UriKind.Relative);
+                    dict.Source = new Uri("/Resources/StringResources.ar.xaml", UriKind.Relative);
                     break;
                 default:
-                    dict.Source = new Uri("..\\Resources\\StringResources.en.xaml", UriKind.Relative);
+                    dict.Source = new Uri("/Resources/StringResources.en.xaml", UriKind.Relative);
                     break;
             }
 

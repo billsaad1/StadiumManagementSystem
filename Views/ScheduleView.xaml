@@ -12,10 +12,7 @@
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
             <DatePicker SelectedDate="{Binding SelectedDate}" Width="150" Margin="0,0,20,0"/>
-            <ComboBox SelectedValue="{Binding SelectedStadium}" Width="150" Margin="0,0,20,0" SelectedValuePath="Content">
-                <ComboBoxItem Content="Stadium 1"/>
-                <ComboBoxItem Content="Stadium 2"/>
-            </ComboBox>
+            <ComboBox ItemsSource="{Binding Stadiums}" SelectedValue="{Binding SelectedStadium}" Width="150" Margin="0,0,20,0" SelectedValuePath="Name" DisplayMemberPath="Name"/>
             <Button Content="{DynamicResource Print}" Command="{Binding PrintScheduleCommand}" Padding="15,5" Background="#17A2B8" Foreground="White" BorderThickness="0"/>
         </StackPanel>
 

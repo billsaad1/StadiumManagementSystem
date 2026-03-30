@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Documents;
 using StadiumManagementSystem.Models;
+using System.Linq;
 
 namespace StadiumManagementSystem.ViewModels
 {

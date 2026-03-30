@@ -40,11 +40,15 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _paymentMethods = new() { "Cash", "Bank Transfer", "Mobile Money" };
 
+        [ObservableProperty]
+        private ObservableCollection<Stadium> _stadiums = new();
+
         private Settings _settings;
 
         public NewBookingViewModel()
         {
             _settings = App.Database.GetSettings();
+            Stadiums = new ObservableCollection<Stadium>(App.Database.GetStadiums());
             UpdatePrice();
         }
 
@@ -58,7 +62,10 @@ namespace StadiumManagementSystem.ViewModels
         {
             int duration = EndHour - StartHour + 1;
             if (duration < 1) duration = 0;
-            decimal pricePerHour = (Stadium != null && Stadium.Contains("1")) ? _settings.Stadium1Price : _settings.Stadium2Price;
+
+            var selected = Stadiums.FirstOrDefault(s => s.Name == Stadium);
+            decimal pricePerHour = selected?.HourlyPrice ?? _settings.Stadium1Price;
+
             TotalPrice = duration * pricePerHour;
         }
 

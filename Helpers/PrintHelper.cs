@@ -4,6 +4,9 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using StadiumManagementSystem.Models;
+using StadiumManagementSystem.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace StadiumManagementSystem.Helpers
 {

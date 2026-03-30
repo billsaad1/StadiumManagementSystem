@@ -2,6 +2,7 @@ using System.Windows;
 using StadiumManagementSystem.Data;
 using StadiumManagementSystem.Views;
 using StadiumManagementSystem.ViewModels;
+using StadiumManagementSystem.Models;
 
 namespace StadiumManagementSystem
 {
