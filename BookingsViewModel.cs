@@ -1,6 +1,8 @@
+using System.Collections.Generic;
+using StadiumManagementSystem.Data;
+using StadiumManagementSystem.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StadiumManagementSystem.Models;
 using System.Collections.ObjectModel;
 
 namespace StadiumManagementSystem.ViewModels
@@ -30,6 +32,42 @@ namespace StadiumManagementSystem.ViewModels
             {
                 LoadBookings();
             }
+        }
+
+        [RelayCommand]
+        private void PrintReceipt(Booking booking)
+        {
+            var settings = App.Database.GetSettings();
+            Helpers.PrintHelper.PrintReceipt(booking, settings);
+        }
+
+        [RelayCommand]
+        private void EditBooking(Booking booking)
+        {
+            var fullBooking = App.Database.GetBookingById(booking.Id);
+            if (fullBooking == null) return;
+
+            var vm = new EditBookingViewModel(fullBooking);
+            var view = new Views.EditBookingView { DataContext = vm };
+            if (view.ShowDialog() == true)
+            {
+                LoadBookings();
+            }
+        }
+
+        [RelayCommand]
+        private void SendWhatsApp(Booking booking)
+        {
+            if (string.IsNullOrEmpty(booking.CustomerPhone)) return;
+
+            string message = $"Hello {booking.CustomerName}, regarding your booking {booking.BookingNumber} on {booking.BookingDate:dd/MM}. Status: {booking.PaymentStatus}.";
+            string url = $"https://wa.me/{booking.CustomerPhone.Replace("+", "").Replace(" ", "")}?text={Uri.EscapeDataString(message)}";
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
         }
     }
 }

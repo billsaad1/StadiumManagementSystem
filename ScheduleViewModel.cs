@@ -1,6 +1,10 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
+using StadiumManagementSystem.Data;
 using StadiumManagementSystem.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
 
 namespace StadiumManagementSystem.ViewModels
 {
@@ -33,6 +37,13 @@ namespace StadiumManagementSystem.ViewModels
         private string _selectedStadium = "Stadium 1";
 
         public ObservableCollection<ScheduleSlot> Slots { get; } = new();
+
+        [RelayCommand]
+        private void Print()
+        {
+            var settings = App.Database.GetSettings();
+            Helpers.PrintHelper.PrintSchedule(SelectedDate, SelectedStadium, Slots, settings);
+        }
 
         public ScheduleViewModel()
         {

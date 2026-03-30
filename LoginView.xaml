@@ -5,7 +5,7 @@
         WindowStartupLocation="CenterScreen" Background="#F0F2F5">
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="300">
-            <TextBlock Text="{DynamicResource Title}" FontSize="20" FontWeight="Bold" Margin="0,0,0,30" TextAlignment="Center" Foreground="#1F4E78"/>
+            <TextBlock Text="{DynamicResource Title}" FontSize="20" FontWeight="Bold" Margin="0,0,0,30" TextAlignment="Center" Foreground="{DynamicResource PrimaryColor}"/>
             
             <TextBlock Text="{DynamicResource Username}" Margin="0,0,0,5"/>
             <TextBox Text="{Binding Username}" Margin="0,0,0,15" Padding="5"/>
@@ -18,7 +18,7 @@
             <Button Content="{DynamicResource Login}" 
                     Command="{Binding LoginCommand}" 
                     CommandParameter="{Binding ElementName=PasswordBox}"
-                    Padding="10" Background="#1F4E78" Foreground="White" FontWeight="Bold"/>
+                    Padding="10" Background="{DynamicResource PrimaryColor}" Foreground="White" FontWeight="Bold"/>
         </StackPanel>
     </Grid>
 </Window>

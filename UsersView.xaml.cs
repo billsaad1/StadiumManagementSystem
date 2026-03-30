@@ -4,9 +4,9 @@ using System.Windows.Controls;
 
 namespace StadiumManagementSystem.Views
 {
-    public partial class ScheduleView : UserControl
+    public partial class UsersView : UserControl
     {
-        public ScheduleView()
+        public UsersView()
         {
             InitializeComponent();
         }

@@ -1,6 +1,8 @@
+using System.Collections.Generic;
+using StadiumManagementSystem.Data;
+using StadiumManagementSystem.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using StadiumManagementSystem.Models;
 
 namespace StadiumManagementSystem.ViewModels
 {
@@ -15,6 +17,9 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private string _errorMessage = string.Empty;
 
+        [ObservableProperty]
+        private User? _currentUser;
+
         public event Action<User>? OnLoginSuccess;
 
         [RelayCommand]
@@ -26,10 +31,10 @@ namespace StadiumManagementSystem.ViewModels
                 password = passwordBox.Password;
             }
 
-            var user = App.Database.Authenticate(Username, password);
-            if (user != null)
+            CurrentUser = App.Database.Authenticate(Username, password);
+            if (CurrentUser != null)
             {
-                OnLoginSuccess?.Invoke(user);
+                OnLoginSuccess?.Invoke(CurrentUser);
             }
             else
             {

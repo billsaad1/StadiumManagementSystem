@@ -1,21 +1,19 @@
-using StadiumManagementSystem.ViewModels;
-using StadiumManagementSystem.Models;
 using System.Windows;
 
 namespace StadiumManagementSystem.Views
 {
-    public partial class NewBookingView : Window
+    public partial class EditBookingView : Window
     {
-        public NewBookingView()
+        public EditBookingView()
         {
             InitializeComponent();
             Loaded += (s, e) =>
             {
-                if (DataContext is ViewModels.NewBookingViewModel vm)
+                if (DataContext is ViewModels.EditBookingViewModel vm)
                 {
                     vm.RequestClose += (result) =>
                     {
-                        DialogResult = result;
+                        if (result) DialogResult = true;
                         Close();
                     };
                 }
