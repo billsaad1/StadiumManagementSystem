@@ -1,0 +1,68 @@
+<UserControl x:Class="StadiumManagementSystem.Views.FinancialsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="{DynamicResource Financials}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}"/>
+            <Button Content="Print Report" Command="{Binding PrintReportCommand}" HorizontalAlignment="Right" Padding="15,5" Background="{DynamicResource PrimaryColor}" Foreground="White" BorderThickness="0"/>
+        </DockPanel>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <DatePicker SelectedDate="{Binding StartDate}" Width="150" Margin="0,0,20,0"/>
+            <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <DatePicker SelectedDate="{Binding EndDate}" Width="150"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <UniformGrid Columns="4" VerticalAlignment="Top" Height="120" Margin="0,0,0,20">
+                    <Border Background="White" Margin="0,0,10,0" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Total Bookings" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalBookings}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="White" Margin="5,0,5,0" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource TotalRevenue}" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalRevenue, StringFormat='{}{0:N0}'}" FontSize="28" FontWeight="Bold" Foreground="#28A745" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="White" Margin="5,0,5,0" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource TotalExpenses}" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding TotalExpenses, StringFormat='{}{0:N0}'}" FontSize="28" FontWeight="Bold" Foreground="#DC3545" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Background="White" Margin="10,0,0,0" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="{DynamicResource NetProfit}" Foreground="Gray" HorizontalAlignment="Center"/>
+                            <TextBlock Text="{Binding NetProfit, StringFormat='{}{0:N0}'}" FontSize="28" FontWeight="Bold" Foreground="#17A2B8" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </UniformGrid>
+
+                <TextBlock Text="Revenue by Stadium" FontSize="20" FontWeight="Bold" Margin="0,10,0,10"/>
+                <ItemsControl ItemsSource="{Binding StadiumRevenues}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="White" Margin="0,0,0,10" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}">
+                                <DockPanel>
+                                    <TextBlock Text="{Binding StadiumName}" FontSize="18" FontWeight="Bold"/>
+                                    <TextBlock Text="{Binding Revenue, StringFormat='{}{0:N0} YER'}" DockPanel.Dock="Right" HorizontalAlignment="Right" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}"/>
+                                </DockPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

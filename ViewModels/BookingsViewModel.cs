@@ -38,7 +38,9 @@ namespace StadiumManagementSystem.ViewModels
         private void PrintReceipt(Booking booking)
         {
             var settings = App.Database.GetSettings();
-            Helpers.PrintHelper.PrintReceipt(booking, settings);
+            var vm = new ReceiptPreviewViewModel(booking, settings);
+            var view = new Views.ReceiptPreviewView { DataContext = vm };
+            view.ShowDialog();
         }
 
         [RelayCommand]

@@ -20,7 +20,16 @@ namespace StadiumManagementSystem.ViewModels
         private decimal _totalRevenue;
 
         [ObservableProperty]
+        private decimal _totalExpenses;
+
+        [ObservableProperty]
+        private decimal _netProfit;
+
+        [ObservableProperty]
         private int _totalBookings;
+
+        [ObservableProperty]
+        private ObservableCollection<StadiumRevenue> _stadiumRevenues = new();
 
         [RelayCommand]
         private void PrintReport()
@@ -43,8 +52,23 @@ namespace StadiumManagementSystem.ViewModels
                 .Where(b => b.BookingDate.Date >= StartDate.Date && b.BookingDate.Date <= EndDate.Date)
                 .ToList();
 
+            var expenses = App.Database.GetExpenses(StartDate, EndDate);
+
             TotalBookings = bookings.Count;
             TotalRevenue = bookings.Sum(b => b.TotalPrice);
+            TotalExpenses = expenses.Sum(e => e.Amount);
+            NetProfit = TotalRevenue - TotalExpenses;
+
+            var stadiumGroup = bookings.GroupBy(b => b.Stadium)
+                .Select(g => new StadiumRevenue { StadiumName = g.Key, Revenue = g.Sum(b => b.TotalPrice) })
+                .ToList();
+            StadiumRevenues = new ObservableCollection<StadiumRevenue>(stadiumGroup);
         }
+    }
+
+    public class StadiumRevenue
+    {
+        public string StadiumName { get; set; } = "";
+        public decimal Revenue { get; set; }
     }
 }

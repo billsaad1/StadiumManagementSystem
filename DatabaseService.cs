@@ -83,6 +83,25 @@ namespace StadiumManagementSystem.Data
                     EveningPrice REAL,
                     IsActive INTEGER DEFAULT 1
                 );
+
+                CREATE TABLE IF NOT EXISTS Payments (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    BookingId INTEGER NOT NULL,
+                    Amount REAL NOT NULL,
+                    PaymentDate TEXT NOT NULL,
+                    PaymentMethod TEXT,
+                    Notes TEXT,
+                    FOREIGN KEY(BookingId) REFERENCES Bookings(Id)
+                );
+
+                CREATE TABLE IF NOT EXISTS Expenses (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Category TEXT NOT NULL,
+                    Amount REAL NOT NULL,
+                    ExpenseDate TEXT NOT NULL,
+                    Description TEXT,
+                    CreatedBy TEXT
+                );
             ";
             command.ExecuteNonQuery();
 
@@ -273,6 +292,28 @@ namespace StadiumManagementSystem.Data
                 command.Parameters.AddWithValue("@ca", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 command.ExecuteNonQuery();
 
+                // Get the last inserted ID
+                var bookingIdCmd = connection.CreateCommand();
+                bookingIdCmd.Transaction = transaction;
+                bookingIdCmd.CommandText = "SELECT last_insert_rowid();";
+                var bookingId = Convert.ToInt32(bookingIdCmd.ExecuteScalar());
+
+                // Create initial payment if deposit > 0
+                if (booking.Deposit > 0)
+                {
+                    var payCmd = connection.CreateCommand();
+                    payCmd.Transaction = transaction;
+                    payCmd.CommandText = @"
+                        INSERT INTO Payments (BookingId, Amount, PaymentDate, PaymentMethod, Notes)
+                        VALUES (@bid, @amt, @date, @pm, 'Initial Deposit')
+                    ";
+                    payCmd.Parameters.AddWithValue("@bid", bookingId);
+                    payCmd.Parameters.AddWithValue("@amt", booking.Deposit);
+                    payCmd.Parameters.AddWithValue("@date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    payCmd.Parameters.AddWithValue("@pm", booking.PaymentMethod ?? "Cash");
+                    payCmd.ExecuteNonQuery();
+                }
+
                 transaction.Commit();
             }
             catch
@@ -282,17 +323,19 @@ namespace StadiumManagementSystem.Data
             }
         }
 
-        public List<Booking> GetBookings()
+        public List<Booking> GetBookings(int? customerId = null)
         {
             var list = new List<Booking>();
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = @"
+            string where = customerId.HasValue ? "WHERE CustomerId = @cid" : "";
+            command.CommandText = $@"
                 SELECT Id, BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot, 
                        CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance, 
                        PaymentMethod, PaymentStatus, Notes, CreatedAt 
-                FROM Bookings ORDER BY CreatedAt DESC";
+                FROM Bookings {where} ORDER BY CreatedAt DESC";
+            if (customerId.HasValue) command.Parameters.AddWithValue("@cid", customerId.Value);
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
@@ -525,6 +568,140 @@ namespace StadiumManagementSystem.Data
             command.Parameters.AddWithValue("@d", deposit);
             command.Parameters.AddWithValue("@b", balance);
             command.Parameters.AddWithValue("@s", status);
+            command.ExecuteNonQuery();
+        }
+
+        // --- NEW PAYMENT METHODS ---
+        public void AddPayment(Payment payment)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                var command = connection.CreateCommand();
+                command.Transaction = transaction;
+                command.CommandText = @"
+                    INSERT INTO Payments (BookingId, Amount, PaymentDate, PaymentMethod, Notes)
+                    VALUES (@bid, @amt, @date, @pm, @n)
+                ";
+                command.Parameters.AddWithValue("@bid", payment.BookingId);
+                command.Parameters.AddWithValue("@amt", payment.Amount);
+                command.Parameters.AddWithValue("@date", payment.PaymentDate.ToString("yyyy-MM-dd HH:mm:ss"));
+                command.Parameters.AddWithValue("@pm", payment.PaymentMethod ?? "Cash");
+                command.Parameters.AddWithValue("@n", payment.Notes ?? "");
+                command.ExecuteNonQuery();
+
+                // Update Booking totals
+                var updateCmd = connection.CreateCommand();
+                updateCmd.Transaction = transaction;
+                updateCmd.CommandText = @"
+                    UPDATE Bookings
+                    SET Deposit = (SELECT SUM(Amount) FROM Payments WHERE BookingId = @bid),
+                        Balance = TotalPrice - (SELECT SUM(Amount) FROM Payments WHERE BookingId = @bid),
+                        PaymentStatus = CASE
+                            WHEN TotalPrice <= (SELECT SUM(Amount) FROM Payments WHERE BookingId = @bid) THEN 'Paid'
+                            ELSE 'Partial'
+                        END
+                    WHERE Id = @bid
+                ";
+                updateCmd.Parameters.AddWithValue("@bid", payment.BookingId);
+                updateCmd.ExecuteNonQuery();
+
+                transaction.Commit();
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        public List<Payment> GetPaymentsByBookingId(int bookingId)
+        {
+            var list = new List<Payment>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT Id, BookingId, Amount, PaymentDate, PaymentMethod, Notes FROM Payments WHERE BookingId = @bid ORDER BY PaymentDate DESC";
+            command.Parameters.AddWithValue("@bid", bookingId);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new Payment
+                {
+                    Id = reader.GetInt32(0),
+                    BookingId = reader.GetInt32(1),
+                    Amount = reader.GetDecimal(2),
+                    PaymentDate = DateTime.Parse(reader.GetString(3)),
+                    PaymentMethod = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    Notes = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                } );
+            }
+            return list;
+        }
+
+        // --- EXPENSE METHODS ---
+        public void SaveExpense(Expense expense)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            if (expense.Id == 0)
+            {
+                command.CommandText = @"
+                    INSERT INTO Expenses (Category, Amount, ExpenseDate, Description, CreatedBy)
+                    VALUES (@c, @a, @d, @desc, @cb)
+                ";
+            }
+            else
+            {
+                command.CommandText = @"
+                    UPDATE Expenses SET Category=@c, Amount=@a, ExpenseDate=@d, Description=@desc, CreatedBy=@cb
+                    WHERE Id=@id
+                ";
+                command.Parameters.AddWithValue("@id", expense.Id);
+            }
+            command.Parameters.AddWithValue("@c", expense.Category);
+            command.Parameters.AddWithValue("@a", expense.Amount);
+            command.Parameters.AddWithValue("@d", expense.ExpenseDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            command.Parameters.AddWithValue("@desc", expense.Description ?? "");
+            command.Parameters.AddWithValue("@cb", expense.CreatedBy ?? "");
+            command.ExecuteNonQuery();
+        }
+
+        public List<Expense> GetExpenses(DateTime start, DateTime end)
+        {
+            var list = new List<Expense>();
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "SELECT Id, Category, Amount, ExpenseDate, Description, CreatedBy FROM Expenses WHERE ExpenseDate BETWEEN @s AND @e ORDER BY ExpenseDate DESC";
+            command.Parameters.AddWithValue("@s", start.ToString("yyyy-MM-dd 00:00:00"));
+            command.Parameters.AddWithValue("@e", end.ToString("yyyy-MM-dd 23:59:59"));
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                list.Add(new Expense
+                {
+                    Id = reader.GetInt32(0),
+                    Category = reader.GetString(1),
+                    Amount = reader.GetDecimal(2),
+                    ExpenseDate = DateTime.Parse(reader.GetString(3)),
+                    Description = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                    CreatedBy = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                });
+            }
+            return list;
+        }
+
+        public void DeleteExpense(int id)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Open();
+            var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM Expenses WHERE Id = @id";
+            command.Parameters.AddWithValue("@id", id);
             command.ExecuteNonQuery();
         }
     }

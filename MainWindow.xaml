@@ -24,6 +24,9 @@
         <DataTemplate DataType="{x:Type vm:FinancialsViewModel}">
             <v:FinancialsView/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ExpensesViewModel}">
+            <v:ExpensesView/>
+        </DataTemplate>
     </Window.Resources>
     
     <Grid>
@@ -42,6 +45,7 @@
                 <Button Content="{DynamicResource Customers}" Command="{Binding NavigateToCustomersCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 <Button Content="{DynamicResource Schedule}" Command="{Binding NavigateToScheduleCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 <Button Content="{DynamicResource Financials}" Command="{Binding NavigateToFinancialsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
+                <Button Content="{DynamicResource Expenses}" Command="{Binding NavigateToExpensesCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 <Button Content="{DynamicResource Settings}" Command="{Binding NavigateToSettingsCommand}" Style="{StaticResource SidebarButtonStyle}"/>
                 
                 <Separator Margin="0,20" Background="#3E7BB0"/>

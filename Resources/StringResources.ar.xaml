@@ -32,4 +32,11 @@
     <system:String x:Key="OrganizationName">اسم المنظمة</system:String>
     <system:String x:Key="ManagerName">اسم المدير</system:String>
     <system:String x:Key="Location">الموقع</system:String>
+    <system:String x:Key="Expenses">المصروفات</system:String>
+    <system:String x:Key="TotalRevenue">إجمالي الإيرادات</system:String>
+    <system:String x:Key="TotalExpenses">إجمالي المصروفات</system:String>
+    <system:String x:Key="NetProfit">صافي الربح</system:String>
+    <system:String x:Key="PaymentHistory">سجل المدفوعات</system:String>
+    <system:String x:Key="AddPayment">إضافة دفعة</system:String>
+    <system:String x:Key="PrintStatement">طباعة كشف حساب</system:String>
 </ResourceDictionary>

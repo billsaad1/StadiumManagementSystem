@@ -40,6 +40,9 @@ namespace StadiumManagementSystem.ViewModels
         private void NavigateToFinancials() => CurrentViewModel = new FinancialsViewModel();
 
         [RelayCommand]
+        private void NavigateToExpenses() => CurrentViewModel = new ExpensesViewModel();
+
+        [RelayCommand]
         private void NavigateToUsers()
         {
             if (CurrentUser?.Role == "Admin")
