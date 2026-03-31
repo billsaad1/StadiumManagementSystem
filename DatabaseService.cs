@@ -1,6 +1,9 @@
-using StadiumManagementSystem.Models;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using Microsoft.Data.Sqlite;
+using StadiumManagementSystem.Models;
 
 namespace StadiumManagementSystem.Data
 {
@@ -19,22 +22,27 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
 
-            // 1. Core Tables Creation
-            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Users (Id INTEGER PRIMARY KEY AUTOINCREMENT, Username TEXT NOT NULL UNIQUE, Password TEXT NOT NULL, Role TEXT NOT NULL);");
-            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Customers (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL, Phone TEXT UNIQUE);");
-            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Bookings (Id INTEGER PRIMARY KEY AUTOINCREMENT, BookingNumber TEXT UNIQUE);");
-            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Settings (Key TEXT PRIMARY KEY, Value TEXT);");
-            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Stadiums (Id INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT NOT NULL);");
-            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Payments (Id INTEGER PRIMARY KEY AUTOINCREMENT, BookingId INTEGER NOT NULL, Amount REAL NOT NULL, PaymentDate TEXT NOT NULL, FOREIGN KEY(BookingId) REFERENCES Bookings(Id));");
-            ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Expenses (Id INTEGER PRIMARY KEY AUTOINCREMENT, Category TEXT NOT NULL, Amount REAL NOT NULL, ExpenseDate TEXT NOT NULL);");
+            // 1. Minimum Core Tables Creation
+            ExecuteNonQuery(connection, "CREATE TABLE IF NOT EXISTS Users (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
+            ExecuteNonQuery(connection, "CREATE TABLE IF NOT EXISTS Customers (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
+            ExecuteNonQuery(connection, "CREATE TABLE IF NOT EXISTS Bookings (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
+            ExecuteNonQuery(connection, "CREATE TABLE IF NOT EXISTS Settings (Key TEXT PRIMARY KEY, Value TEXT);");
+            ExecuteNonQuery(connection, "CREATE TABLE IF NOT EXISTS Stadiums (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
+            ExecuteNonQuery(connection, "CREATE TABLE IF NOT EXISTS Payments (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
+            ExecuteNonQuery(connection, "CREATE TABLE IF NOT EXISTS Expenses (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
 
-            // 2. Incremental Migration Safety (One column at a time)
+            // 2. Robust Column Migration
             // Users
+            AddColumnIfMissing(connection, "Users", "Username", "TEXT");
+            AddColumnIfMissing(connection, "Users", "Password", "TEXT");
+            AddColumnIfMissing(connection, "Users", "Role", "TEXT");
             AddColumnIfMissing(connection, "Users", "FullName", "TEXT");
             AddColumnIfMissing(connection, "Users", "IsActive", "INTEGER DEFAULT 1");
             AddColumnIfMissing(connection, "Users", "Notes", "TEXT");
 
             // Customers
+            AddColumnIfMissing(connection, "Customers", "Name", "TEXT");
+            AddColumnIfMissing(connection, "Customers", "Phone", "TEXT");
             AddColumnIfMissing(connection, "Customers", "Email", "TEXT");
             AddColumnIfMissing(connection, "Customers", "Address", "TEXT");
             AddColumnIfMissing(connection, "Customers", "Type", "TEXT DEFAULT 'Regular'");
@@ -46,6 +54,7 @@ namespace StadiumManagementSystem.Data
             AddColumnIfMissing(connection, "Customers", "IsActive", "INTEGER DEFAULT 1");
 
             // Bookings
+            AddColumnIfMissing(connection, "Bookings", "BookingNumber", "TEXT");
             AddColumnIfMissing(connection, "Bookings", "BookingDate", "TEXT");
             AddColumnIfMissing(connection, "Bookings", "Stadium", "TEXT");
             AddColumnIfMissing(connection, "Bookings", "StartHour", "INTEGER");
@@ -56,7 +65,7 @@ namespace StadiumManagementSystem.Data
             AddColumnIfMissing(connection, "Bookings", "CustomerName", "TEXT");
             AddColumnIfMissing(connection, "Bookings", "CustomerPhone", "TEXT");
             AddColumnIfMissing(connection, "Bookings", "Status", "TEXT");
-            AddColumnIfMissing(connection, "Bookings", "TotalPrice", "REAL");
+            AddColumnIfMissing(connection, "Bookings", "TotalPrice", "REAL DEFAULT 0");
             AddColumnIfMissing(connection, "Bookings", "Deposit", "REAL DEFAULT 0");
             AddColumnIfMissing(connection, "Bookings", "Balance", "REAL DEFAULT 0");
             AddColumnIfMissing(connection, "Bookings", "PaymentMethod", "TEXT");
@@ -65,49 +74,73 @@ namespace StadiumManagementSystem.Data
             AddColumnIfMissing(connection, "Bookings", "CreatedAt", "TEXT");
 
             // Stadiums
-            AddColumnIfMissing(connection, "Stadiums", "MorningPrice", "REAL");
-            AddColumnIfMissing(connection, "Stadiums", "EveningPrice", "REAL");
+            AddColumnIfMissing(connection, "Stadiums", "Name", "TEXT");
+            AddColumnIfMissing(connection, "Stadiums", "MorningPrice", "REAL DEFAULT 0");
+            AddColumnIfMissing(connection, "Stadiums", "EveningPrice", "REAL DEFAULT 0");
             AddColumnIfMissing(connection, "Stadiums", "IsActive", "INTEGER DEFAULT 1");
 
             // Payments
             AddColumnIfMissing(connection, "Payments", "BookingId", "INTEGER");
-            AddColumnIfMissing(connection, "Payments", "Amount", "REAL");
+            AddColumnIfMissing(connection, "Payments", "Amount", "REAL DEFAULT 0");
             AddColumnIfMissing(connection, "Payments", "PaymentDate", "TEXT");
             AddColumnIfMissing(connection, "Payments", "PaymentMethod", "TEXT");
             AddColumnIfMissing(connection, "Payments", "Notes", "TEXT");
 
             // Expenses
             AddColumnIfMissing(connection, "Expenses", "Category", "TEXT");
-            AddColumnIfMissing(connection, "Expenses", "Amount", "REAL");
+            AddColumnIfMissing(connection, "Expenses", "Amount", "REAL DEFAULT 0");
             AddColumnIfMissing(connection, "Expenses", "ExpenseDate", "TEXT");
             AddColumnIfMissing(connection, "Expenses", "Description", "TEXT");
             AddColumnIfMissing(connection, "Expenses", "CreatedBy", "TEXT");
 
-            // 3. Default data and migrations
+            // 3. Default Data
             ExecuteNonQuery(connection, @"
                 INSERT OR IGNORE INTO Users (Username, Password, Role, FullName) 
                 VALUES ('admin', '1234', 'Admin', 'System Administrator');
-
-                -- Default settings
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('OrganizationName', 'Jeel Al Bena Association');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium1Price', '8000');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Stadium2Price', '8000');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('ManagerName', 'Bilal Al Salami');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Location', 'Sana''a, Yemen');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Phone', '+967 777 123 456');
-                INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('Address', 'Main Street, Sana''a');
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('EveningCutoffHour', '18');
                 INSERT OR IGNORE INTO Settings (Key, Value) VALUES ('ThemeColor', '#1F4E78');
-
-                -- Initial migration for Stadiums from legacy settings
-                INSERT OR IGNORE INTO Stadiums (Name, MorningPrice, EveningPrice)
-                SELECT 'Stadium 1', CAST(Value AS REAL), CAST(Value AS REAL) FROM Settings WHERE Key = 'Stadium1Price'
-                AND NOT EXISTS (SELECT 1 FROM Stadiums WHERE Name = 'Stadium 1');
-
-                INSERT OR IGNORE INTO Stadiums (Name, MorningPrice, EveningPrice)
-                SELECT 'Stadium 2', CAST(Value AS REAL), CAST(Value AS REAL) FROM Settings WHERE Key = 'Stadium2Price'
-                AND NOT EXISTS (SELECT 1 FROM Stadiums WHERE Name = 'Stadium 2');
             ");
+        }
+
+        private void ExecuteNonQuery(SqliteConnection connection, string sql)
+        {
+            using var command = connection.CreateCommand();
+            command.CommandText = sql;
+            command.ExecuteNonQuery();
+        }
+
+        private void AddColumnIfMissing(SqliteConnection connection, string tableName, string columnName, string columnType)
+        {
+            try
+            {
+                using var checkCmd = connection.CreateCommand();
+                // Standard SQLite pragma to list columns
+                checkCmd.CommandText = $"PRAGMA table_info({tableName});";
+                bool exists = false;
+                using (var reader = checkCmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        // Column name is the second field (index 1)
+                        if (reader.GetString(1).Equals(columnName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            exists = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!exists)
+                {
+                    ExecuteNonQuery(connection, $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnType};");
+                }
+            }
+            catch (Exception ex)
+            {
+                // In a real app, log this. Swallowing for now to ensure startup continues.
+                System.Diagnostics.Debug.WriteLine($"Migration Error: {ex.Message}");
+            }
         }
 
         public Settings GetSettings()
@@ -129,7 +162,7 @@ namespace StadiumManagementSystem.Data
                     case "Location": settings.Location = val; break;
                     case "Phone": settings.Phone = val; break;
                     case "Address": settings.Address = val; break;
-                    case "EveningCutoffHour": settings.EveningCutoffHour = int.Parse(val); break;
+                    case "EveningCutoffHour": int.TryParse(val, out int h); settings.EveningCutoffHour = h; break;
                     case "ThemeColor": settings.ThemeColor = val; break;
                     case "LogoPath": settings.LogoPath = val; break;
                 }
@@ -171,8 +204,8 @@ namespace StadiumManagementSystem.Data
             command.CommandText = @"
                 SELECT COUNT(*) FROM Bookings 
                 WHERE Stadium = @s AND BookingDate = @d
-                AND StartHour <= @end AND EndHour >= @start
-            ";
+                AND NOT (EndHour < @start OR StartHour > @end)
+                AND Status != 'Cancelled'";
             command.Parameters.AddWithValue("@s", stadium);
             command.Parameters.AddWithValue("@d", date.ToString("yyyy-MM-dd"));
             command.Parameters.AddWithValue("@start", start);
@@ -256,25 +289,21 @@ namespace StadiumManagementSystem.Data
                 command.Parameters.AddWithValue("@ca", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 command.ExecuteNonQuery();
 
-                // Get the last inserted ID
-                var bookingIdCmd = connection.CreateCommand();
-                bookingIdCmd.Transaction = transaction;
-                bookingIdCmd.CommandText = "SELECT last_insert_rowid();";
-                var bookingId = Convert.ToInt32(bookingIdCmd.ExecuteScalar());
+                // Get last inserted ID for the initial payment record
+                var idCmd = connection.CreateCommand();
+                idCmd.Transaction = transaction;
+                idCmd.CommandText = "SELECT last_insert_rowid();";
+                int bookingId = Convert.ToInt32(idCmd.ExecuteScalar());
 
-                // Create initial payment if deposit > 0
                 if (booking.Deposit > 0)
                 {
                     var payCmd = connection.CreateCommand();
                     payCmd.Transaction = transaction;
-                    payCmd.CommandText = @"
-                        INSERT INTO Payments (BookingId, Amount, PaymentDate, PaymentMethod, Notes)
-                        VALUES (@bid, @amt, @date, @pm, 'Initial Deposit')
-                    ";
+                    payCmd.CommandText = "INSERT INTO Payments (BookingId, Amount, PaymentDate, PaymentMethod, Notes) VALUES (@bid, @amt, @date, @pm, 'Initial Deposit')";
                     payCmd.Parameters.AddWithValue("@bid", bookingId);
                     payCmd.Parameters.AddWithValue("@amt", booking.Deposit);
                     payCmd.Parameters.AddWithValue("@date", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                    payCmd.Parameters.AddWithValue("@pm", booking.PaymentMethod ?? "Cash");
+                    payCmd.Parameters.AddWithValue("@pm", booking.PaymentMethod);
                     payCmd.ExecuteNonQuery();
                 }
 
@@ -300,28 +329,29 @@ namespace StadiumManagementSystem.Data
                        PaymentMethod, PaymentStatus, Notes, CreatedAt 
                 FROM Bookings {where} ORDER BY CreatedAt DESC";
             if (customerId.HasValue) command.Parameters.AddWithValue("@cid", customerId.Value);
+
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
                 list.Add(new Booking
                 {
                     Id = reader.GetInt32(0),
-                    BookingNumber = reader.GetString(1),
+                    BookingNumber = reader.IsDBNull(1) ? "" : reader.GetString(1),
                     BookingDate = DateTime.Parse(reader.GetString(2)),
-                    Stadium = reader.GetString(3),
+                    Stadium = reader.IsDBNull(3) ? "" : reader.GetString(3),
                     StartHour = reader.GetInt32(4),
                     EndHour = reader.GetInt32(5),
                     Duration = reader.GetInt32(6),
-                    TimeSlot = reader.GetString(7),
+                    TimeSlot = reader.IsDBNull(7) ? "" : reader.GetString(7),
                     CustomerId = reader.GetInt32(8),
-                    CustomerName = reader.GetString(9),
+                    CustomerName = reader.IsDBNull(9) ? "" : reader.GetString(9),
                     CustomerPhone = reader.IsDBNull(10) ? "" : reader.GetString(10),
-                    Status = reader.GetString(11),
+                    Status = reader.IsDBNull(11) ? "" : reader.GetString(11),
                     TotalPrice = reader.GetDecimal(12),
                     Deposit = reader.GetDecimal(13),
                     Balance = reader.GetDecimal(14),
-                    PaymentMethod = reader.GetString(15),
-                    PaymentStatus = reader.GetString(16),
+                    PaymentMethod = reader.IsDBNull(15) ? "" : reader.GetString(15),
+                    PaymentStatus = reader.IsDBNull(16) ? "" : reader.GetString(16),
                     Notes = reader.IsDBNull(17) ? "" : reader.GetString(17),
                     CreatedAt = DateTime.Parse(reader.GetString(18))
                 });
@@ -335,21 +365,19 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = @"
-                SELECT Id, Name, Phone, Email, Address, Type, RegistrationDate, TotalBookings, TotalSpent, LastBooking, Notes, IsActive 
-                FROM Customers ORDER BY TotalSpent DESC";
+            command.CommandText = "SELECT Id, Name, Phone, Email, Address, Type, RegistrationDate, TotalBookings, TotalSpent, LastBooking, Notes, IsActive FROM Customers ORDER BY TotalSpent DESC";
             using var reader = command.ExecuteReader();
             while (reader.Read())
             {
                 list.Add(new Customer
                 {
                     Id = reader.GetInt32(0),
-                    Name = reader.GetString(1),
-                    Phone = reader.GetString(2),
+                    Name = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                    Phone = reader.IsDBNull(2) ? "" : reader.GetString(2),
                     Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
                     Address = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                    Type = reader.GetString(5),
-                    RegistrationDate = DateTime.Parse(reader.GetString(6)),
+                    Type = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                    RegistrationDate = reader.IsDBNull(6) ? DateTime.MinValue : DateTime.Parse(reader.GetString(6)),
                     TotalBookings = reader.GetInt32(7),
                     TotalSpent = reader.GetDecimal(8),
                     LastBooking = reader.IsDBNull(9) ? null : DateTime.Parse(reader.GetString(9)),
@@ -391,17 +419,11 @@ namespace StadiumManagementSystem.Data
             var command = connection.CreateCommand();
             if (user.Id == 0)
             {
-                command.CommandText = @"
-                    INSERT INTO Users (Username, Password, Role, FullName, IsActive, Notes)
-                    VALUES (@u, @p, @r, @f, @a, @n)
-                ";
+                command.CommandText = "INSERT INTO Users (Username, Password, Role, FullName, IsActive, Notes) VALUES (@u, @p, @r, @f, @a, @n)";
             }
             else
             {
-                command.CommandText = @"
-                    UPDATE Users SET Username=@u, Password=@p, Role=@r, FullName=@f, IsActive=@a, Notes=@n
-                    WHERE Id=@id
-                ";
+                command.CommandText = "UPDATE Users SET Username=@u, Password=@p, Role=@r, FullName=@f, IsActive=@a, Notes=@n WHERE Id=@id";
                 command.Parameters.AddWithValue("@id", user.Id);
             }
             command.Parameters.AddWithValue("@u", user.Username);
@@ -436,7 +458,7 @@ namespace StadiumManagementSystem.Data
                 list.Add(new Stadium
                 {
                     Id = reader.GetInt32(0),
-                    Name = reader.GetString(1),
+                    Name = reader.IsDBNull(1) ? "" : reader.GetString(1),
                     MorningPrice = reader.GetDecimal(2),
                     EveningPrice = reader.GetDecimal(3),
                     IsActive = reader.GetInt32(4) == 1
@@ -452,17 +474,11 @@ namespace StadiumManagementSystem.Data
             var command = connection.CreateCommand();
             if (stadium.Id == 0)
             {
-                command.CommandText = @"
-                    INSERT INTO Stadiums (Name, MorningPrice, EveningPrice, IsActive)
-                    VALUES (@n, @mp, @ep, @a)
-                ";
+                command.CommandText = "INSERT INTO Stadiums (Name, MorningPrice, EveningPrice, IsActive) VALUES (@n, @mp, @ep, @a)";
             }
             else
             {
-                command.CommandText = @"
-                    UPDATE Stadiums SET Name=@n, MorningPrice=@mp, EveningPrice=@ep, IsActive=@a
-                    WHERE Id=@id
-                ";
+                command.CommandText = "UPDATE Stadiums SET Name=@n, MorningPrice=@mp, EveningPrice=@ep, IsActive=@a WHERE Id=@id";
                 command.Parameters.AddWithValue("@id", stadium.Id);
             }
             command.Parameters.AddWithValue("@n", stadium.Name);
@@ -487,11 +503,7 @@ namespace StadiumManagementSystem.Data
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
             var command = connection.CreateCommand();
-            command.CommandText = @"
-                SELECT Id, BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot, 
-                       CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance, 
-                       PaymentMethod, PaymentStatus, Notes, CreatedAt 
-                FROM Bookings WHERE Id = @id";
+            command.CommandText = "SELECT Id, BookingNumber, BookingDate, Stadium, StartHour, EndHour, Duration, TimeSlot, CustomerId, CustomerName, CustomerPhone, Status, TotalPrice, Deposit, Balance, PaymentMethod, PaymentStatus, Notes, CreatedAt FROM Bookings WHERE Id = @id";
             command.Parameters.AddWithValue("@id", id);
             using var reader = command.ExecuteReader();
             if (reader.Read())
@@ -499,22 +511,22 @@ namespace StadiumManagementSystem.Data
                 return new Booking
                 {
                     Id = reader.GetInt32(0),
-                    BookingNumber = reader.GetString(1),
+                    BookingNumber = reader.IsDBNull(1) ? "" : reader.GetString(1),
                     BookingDate = DateTime.Parse(reader.GetString(2)),
-                    Stadium = reader.GetString(3),
+                    Stadium = reader.IsDBNull(3) ? "" : reader.GetString(3),
                     StartHour = reader.GetInt32(4),
                     EndHour = reader.GetInt32(5),
                     Duration = reader.GetInt32(6),
-                    TimeSlot = reader.GetString(7),
+                    TimeSlot = reader.IsDBNull(7) ? "" : reader.GetString(7),
                     CustomerId = reader.GetInt32(8),
-                    CustomerName = reader.GetString(9),
+                    CustomerName = reader.IsDBNull(9) ? "" : reader.GetString(9),
                     CustomerPhone = reader.IsDBNull(10) ? "" : reader.GetString(10),
-                    Status = reader.GetString(11),
+                    Status = reader.IsDBNull(11) ? "" : reader.GetString(11),
                     TotalPrice = reader.GetDecimal(12),
                     Deposit = reader.GetDecimal(13),
                     Balance = reader.GetDecimal(14),
-                    PaymentMethod = reader.GetString(15),
-                    PaymentStatus = reader.GetString(16),
+                    PaymentMethod = reader.IsDBNull(15) ? "" : reader.GetString(15),
+                    PaymentStatus = reader.IsDBNull(16) ? "" : reader.GetString(16),
                     Notes = reader.IsDBNull(17) ? "" : reader.GetString(17),
                     CreatedAt = DateTime.Parse(reader.GetString(18))
                 };
@@ -522,20 +534,6 @@ namespace StadiumManagementSystem.Data
             return null;
         }
 
-        public void UpdateBookingPayment(int id, decimal deposit, decimal balance, string status)
-        {
-            using var connection = new SqliteConnection(_connectionString);
-            connection.Open();
-            var command = connection.CreateCommand();
-            command.CommandText = "UPDATE Bookings SET Deposit=@d, Balance=@b, PaymentStatus=@s WHERE Id=@id";
-            command.Parameters.AddWithValue("@id", id);
-            command.Parameters.AddWithValue("@d", deposit);
-            command.Parameters.AddWithValue("@b", balance);
-            command.Parameters.AddWithValue("@s", status);
-            command.ExecuteNonQuery();
-        }
-
-        // --- NEW PAYMENT METHODS ---
         public void AddPayment(Payment payment)
         {
             using var connection = new SqliteConnection(_connectionString);
@@ -545,10 +543,7 @@ namespace StadiumManagementSystem.Data
             {
                 var command = connection.CreateCommand();
                 command.Transaction = transaction;
-                command.CommandText = @"
-                    INSERT INTO Payments (BookingId, Amount, PaymentDate, PaymentMethod, Notes)
-                    VALUES (@bid, @amt, @date, @pm, @n)
-                ";
+                command.CommandText = "INSERT INTO Payments (BookingId, Amount, PaymentDate, PaymentMethod, Notes) VALUES (@bid, @amt, @date, @pm, @n)";
                 command.Parameters.AddWithValue("@bid", payment.BookingId);
                 command.Parameters.AddWithValue("@amt", payment.Amount);
                 command.Parameters.AddWithValue("@date", payment.PaymentDate.ToString("yyyy-MM-dd HH:mm:ss"));
@@ -556,7 +551,6 @@ namespace StadiumManagementSystem.Data
                 command.Parameters.AddWithValue("@n", payment.Notes ?? "");
                 command.ExecuteNonQuery();
 
-                // Update Booking totals
                 var updateCmd = connection.CreateCommand();
                 updateCmd.Transaction = transaction;
                 updateCmd.CommandText = @"
@@ -567,8 +561,7 @@ namespace StadiumManagementSystem.Data
                             WHEN TotalPrice <= (SELECT SUM(Amount) FROM Payments WHERE BookingId = @bid) THEN 'Paid'
                             ELSE 'Partial'
                         END
-                    WHERE Id = @bid
-                ";
+                    WHERE Id = @bid";
                 updateCmd.Parameters.AddWithValue("@bid", payment.BookingId);
                 updateCmd.ExecuteNonQuery();
 
@@ -600,12 +593,11 @@ namespace StadiumManagementSystem.Data
                     PaymentDate = DateTime.Parse(reader.GetString(3)),
                     PaymentMethod = reader.IsDBNull(4) ? "" : reader.GetString(4),
                     Notes = reader.IsDBNull(5) ? "" : reader.GetString(5)
-                } );
+                });
             }
             return list;
         }
 
-        // --- EXPENSE METHODS ---
         public void SaveExpense(Expense expense)
         {
             using var connection = new SqliteConnection(_connectionString);
@@ -613,17 +605,11 @@ namespace StadiumManagementSystem.Data
             var command = connection.CreateCommand();
             if (expense.Id == 0)
             {
-                command.CommandText = @"
-                    INSERT INTO Expenses (Category, Amount, ExpenseDate, Description, CreatedBy)
-                    VALUES (@c, @a, @d, @desc, @cb)
-                ";
+                command.CommandText = "INSERT INTO Expenses (Category, Amount, ExpenseDate, Description, CreatedBy) VALUES (@c, @a, @d, @desc, @cb)";
             }
             else
             {
-                command.CommandText = @"
-                    UPDATE Expenses SET Category=@c, Amount=@a, ExpenseDate=@d, Description=@desc, CreatedBy=@cb
-                    WHERE Id=@id
-                ";
+                command.CommandText = "UPDATE Expenses SET Category=@c, Amount=@a, ExpenseDate=@d, Description=@desc, CreatedBy=@cb WHERE Id=@id";
                 command.Parameters.AddWithValue("@id", expense.Id);
             }
             command.Parameters.AddWithValue("@c", expense.Category);
@@ -649,7 +635,7 @@ namespace StadiumManagementSystem.Data
                 list.Add(new Expense
                 {
                     Id = reader.GetInt32(0),
-                    Category = reader.GetString(1),
+                    Category = reader.IsDBNull(1) ? "" : reader.GetString(1),
                     Amount = reader.GetDecimal(2),
                     ExpenseDate = DateTime.Parse(reader.GetString(3)),
                     Description = reader.IsDBNull(4) ? "" : reader.GetString(4),
@@ -667,40 +653,6 @@ namespace StadiumManagementSystem.Data
             command.CommandText = "DELETE FROM Expenses WHERE Id = @id";
             command.Parameters.AddWithValue("@id", id);
             command.ExecuteNonQuery();
-        }
-
-        private void ExecuteNonQuery(SqliteConnection connection, string sql)
-        {
-            using var command = connection.CreateCommand();
-            command.CommandText = sql;
-            command.ExecuteNonQuery();
-        }
-
-        private void AddColumnIfMissing(SqliteConnection connection, string tableName, string columnName, string columnType)
-        {
-            try
-            {
-                using var checkCmd = connection.CreateCommand();
-                checkCmd.CommandText = $"PRAGMA table_info({tableName});";
-                bool exists = false;
-                using (var reader = checkCmd.ExecuteReader())
-                {
-                    while (reader.Read())
-                    {
-                        if (reader.GetString(1).Equals(columnName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            exists = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!exists)
-                {
-                    ExecuteNonQuery(connection, $"ALTER TABLE {tableName} ADD COLUMN {columnName} {columnType};");
-                }
-            }
-            catch { /* Best effort */ }
         }
     }
 }

@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+                    xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:win="clr-namespace:System.Windows;assembly=PresentationCore">
     <system:String x:Key="Title">Stadium Management System</system:String>
     <system:String x:Key="Login">Login</system:String>
     <system:String x:Key="Username">Username</system:String>
@@ -21,7 +22,7 @@
     <system:String x:Key="Clear">Clear</system:String>
     <system:String x:Key="Settings">Settings</system:String>
     <system:String x:Key="Logout">Logout</system:String>
-    <system:String x:Key="FlowDirection">LeftToRight</system:String>
+    <win:FlowDirection x:Key="FlowDirection">LeftToRight</win:FlowDirection>
     <system:String x:Key="BookingsToday">Bookings Today</system:String>
     <system:String x:Key="RevenueToday">Revenue Today</system:String>
     <system:String x:Key="AvailableSlots">Available Slots</system:String>
