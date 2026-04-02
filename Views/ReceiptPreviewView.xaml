@@ -9,7 +9,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <FlowDocumentReader Grid.Row="0" Document="{Binding ReceiptDocument}" ViewingMode="Print"/>
+        <FlowDocumentReader Grid.Row="0" Document="{Binding ReceiptDocument}" ViewingMode="Page"/>
 
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="10">
             <Button Content="Print" Command="{Binding PrintCommand}" Width="100" Margin="0,0,10,0" Padding="8" Background="#28A745" Foreground="White" BorderThickness="0"/>

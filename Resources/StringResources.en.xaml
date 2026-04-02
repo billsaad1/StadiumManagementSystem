@@ -23,7 +23,7 @@
     <system:String x:Key="Logout">Logout</system:String>
 
     <!-- FlowDirection is used for the entire application layout -->
-    <FlowDirection x:Key="FlowDirection">LeftToRight</FlowDirection>
+    <x:Static x:Key="FlowDirection" Member="FlowDirection.LeftToRight"/>
 
     <system:String x:Key="BookingsToday">Bookings Today</system:String>
     <system:String x:Key="RevenueToday">Revenue Today</system:String>

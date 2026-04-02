@@ -1,18 +1,19 @@
 <Application x:Class="StadiumManagementSystem.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="clr-namespace:StadiumManagementSystem.Helpers"
              Startup="Application_Startup">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/StadiumManagementSystem;component/Resources/StringResources.en.xaml"/>
+                <ResourceDictionary Source="pack://application:,,,/Resources/StringResources.en.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <SolidColorBrush x:Key="PrimaryColor" Color="#1F4E78"/>
             <SolidColorBrush x:Key="PrimaryColorDark" Color="#153653"/>
             
-            <h:StatusToColorConverter x:Key="StatusToColorConverter" xmlns:h="clr-namespace:StadiumManagementSystem.Helpers"/>
-            <h:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter" xmlns:h="clr-namespace:StadiumManagementSystem.Helpers"/>
+            <h:StatusToColorConverter x:Key="StatusToColorConverter"/>
+            <h:RoleToVisibilityConverter x:Key="RoleToVisibilityConverter"/>
 
             <Style x:Key="SidebarButtonStyle" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
