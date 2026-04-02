@@ -22,7 +22,7 @@
     <system:String x:Key="Settings">الإعدادات</system:String>
     <system:String x:Key="Logout">تسجيل الخروج</system:String>
 
-    <system:String x:Key="FlowDirection">RightToLeft</system:String>
+    <FlowDirection x:Key="FlowDirection">RightToLeft</FlowDirection>
 
     <system:String x:Key="BookingsToday">حجوزات اليوم</system:String>
     <system:String x:Key="RevenueToday">إيرادات اليوم</system:String>

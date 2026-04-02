@@ -22,8 +22,8 @@
     <system:String x:Key="Settings">Settings</system:String>
     <system:String x:Key="Logout">Logout</system:String>
 
-    <!-- FlowDirection is handled by the Window, we use the string here for the helper -->
-    <system:String x:Key="FlowDirection">LeftToRight</system:String>
+    <!-- FlowDirection is used for the entire application layout -->
+    <FlowDirection x:Key="FlowDirection">LeftToRight</FlowDirection>
 
     <system:String x:Key="BookingsToday">Bookings Today</system:String>
     <system:String x:Key="RevenueToday">Revenue Today</system:String>
