@@ -314,23 +314,23 @@ namespace StadiumManagementSystem.Data
                 {
                     Id = reader.GetInt32(0),
                     BookingNumber = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                    BookingDate = DateTime.Parse(reader.GetString(2)),
+                    BookingDate = reader.IsDBNull(2) ? DateTime.MinValue : DateTime.Parse(reader.GetString(2)),
                     Stadium = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                    StartHour = reader.GetInt32(4),
-                    EndHour = reader.GetInt32(5),
-                    Duration = reader.GetInt32(6),
+                    StartHour = reader.IsDBNull(4) ? 0 : reader.GetInt32(4),
+                    EndHour = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
+                    Duration = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
                     TimeSlot = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                    CustomerId = reader.GetInt32(8),
+                    CustomerId = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
                     CustomerName = reader.IsDBNull(9) ? "" : reader.GetString(9),
                     CustomerPhone = reader.IsDBNull(10) ? "" : reader.GetString(10),
                     Status = reader.IsDBNull(11) ? "" : reader.GetString(11),
-                    TotalPrice = reader.GetDecimal(12),
-                    Deposit = reader.GetDecimal(13),
-                    Balance = reader.GetDecimal(14),
+                    TotalPrice = reader.IsDBNull(12) ? 0 : reader.GetDecimal(12),
+                    Deposit = reader.IsDBNull(13) ? 0 : reader.GetDecimal(13),
+                    Balance = reader.IsDBNull(14) ? 0 : reader.GetDecimal(14),
                     PaymentMethod = reader.IsDBNull(15) ? "" : reader.GetString(15),
                     PaymentStatus = reader.IsDBNull(16) ? "" : reader.GetString(16),
                     Notes = reader.IsDBNull(17) ? "" : reader.GetString(17),
-                    CreatedAt = DateTime.Parse(reader.GetString(18))
+                    CreatedAt = reader.IsDBNull(18) ? DateTime.MinValue : DateTime.Parse(reader.GetString(18))
                 });
             }
             return list;
@@ -444,9 +444,9 @@ namespace StadiumManagementSystem.Data
                 {
                     Id = reader.GetInt32(0),
                     Name = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                    MorningPrice = reader.GetDecimal(2),
-                    EveningPrice = reader.GetDecimal(3),
-                    IsActive = reader.GetInt32(4) == 1
+                    MorningPrice = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2),
+                    EveningPrice = reader.IsDBNull(3) ? 0 : reader.GetDecimal(3),
+                    IsActive = !reader.IsDBNull(4) && reader.GetInt32(4) == 1
                 });
             }
             return list;
@@ -507,23 +507,23 @@ namespace StadiumManagementSystem.Data
                 {
                     Id = reader.GetInt32(0),
                     BookingNumber = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                    BookingDate = DateTime.Parse(reader.GetString(2)),
+                    BookingDate = reader.IsDBNull(2) ? DateTime.MinValue : DateTime.Parse(reader.GetString(2)),
                     Stadium = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                    StartHour = reader.GetInt32(4),
-                    EndHour = reader.GetInt32(5),
-                    Duration = reader.GetInt32(6),
+                    StartHour = reader.IsDBNull(4) ? 0 : reader.GetInt32(4),
+                    EndHour = reader.IsDBNull(5) ? 0 : reader.GetInt32(5),
+                    Duration = reader.IsDBNull(6) ? 0 : reader.GetInt32(6),
                     TimeSlot = reader.IsDBNull(7) ? "" : reader.GetString(7),
-                    CustomerId = reader.GetInt32(8),
+                    CustomerId = reader.IsDBNull(8) ? 0 : reader.GetInt32(8),
                     CustomerName = reader.IsDBNull(9) ? "" : reader.GetString(9),
                     CustomerPhone = reader.IsDBNull(10) ? "" : reader.GetString(10),
                     Status = reader.IsDBNull(11) ? "" : reader.GetString(11),
-                    TotalPrice = reader.GetDecimal(12),
-                    Deposit = reader.GetDecimal(13),
-                    Balance = reader.GetDecimal(14),
+                    TotalPrice = reader.IsDBNull(12) ? 0 : reader.GetDecimal(12),
+                    Deposit = reader.IsDBNull(13) ? 0 : reader.GetDecimal(13),
+                    Balance = reader.IsDBNull(14) ? 0 : reader.GetDecimal(14),
                     PaymentMethod = reader.IsDBNull(15) ? "" : reader.GetString(15),
                     PaymentStatus = reader.IsDBNull(16) ? "" : reader.GetString(16),
                     Notes = reader.IsDBNull(17) ? "" : reader.GetString(17),
-                    CreatedAt = DateTime.Parse(reader.GetString(18))
+                    CreatedAt = reader.IsDBNull(18) ? DateTime.MinValue : DateTime.Parse(reader.GetString(18))
                 };
             }
             return null;
@@ -588,9 +588,9 @@ namespace StadiumManagementSystem.Data
                 list.Add(new Payment
                 {
                     Id = reader.GetInt32(0),
-                    BookingId = reader.GetInt32(1),
-                    Amount = reader.GetDecimal(2),
-                    PaymentDate = DateTime.Parse(reader.GetString(3)),
+                    BookingId = reader.IsDBNull(1) ? 0 : reader.GetInt32(1),
+                    Amount = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2),
+                    PaymentDate = reader.IsDBNull(3) ? DateTime.MinValue : DateTime.Parse(reader.GetString(3)),
                     PaymentMethod = reader.IsDBNull(4) ? "" : reader.GetString(4),
                     Notes = reader.IsDBNull(5) ? "" : reader.GetString(5)
                 } );
@@ -642,8 +642,8 @@ namespace StadiumManagementSystem.Data
                 {
                     Id = reader.GetInt32(0),
                     Category = reader.IsDBNull(1) ? "" : reader.GetString(1),
-                    Amount = reader.GetDecimal(2),
-                    ExpenseDate = DateTime.Parse(reader.GetString(3)),
+                    Amount = reader.IsDBNull(2) ? 0 : reader.GetDecimal(2),
+                    ExpenseDate = reader.IsDBNull(3) ? DateTime.MinValue : DateTime.Parse(reader.GetString(3)),
                     Description = reader.IsDBNull(4) ? "" : reader.GetString(4),
                     CreatedBy = reader.IsDBNull(5) ? "" : reader.GetString(5)
                 });

@@ -27,11 +27,22 @@ namespace StadiumManagementSystem.ViewModels
         [RelayCommand]
         private void Print()
         {
-            PrintDialog printDialog = new PrintDialog();
-            if (printDialog.ShowDialog() == true)
+            try
             {
-                printDialog.PrintDocument(((IDocumentPaginatorSource)ReceiptDocument).DocumentPaginator, "Stadium Receipt");
-                RequestClose?.Invoke();
+                PrintDialog printDialog = new PrintDialog();
+                if (printDialog.ShowDialog() == true)
+                {
+                    printDialog.PrintDocument(((IDocumentPaginatorSource)ReceiptDocument).DocumentPaginator, "Stadium Receipt");
+                    RequestClose?.Invoke();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show(
+                    "Error occurred during printing: " + ex.Message,
+                    "Print Error",
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Error);
             }
         }
 
