@@ -35,7 +35,7 @@ namespace StadiumManagementSystem.ViewModels
         private void PrintReport()
         {
             var settings = App.Database.GetSettings();
-            Helpers.PrintHelper.PrintFinancialReport(StartDate, EndDate, TotalBookings, TotalRevenue, settings);
+            Helpers.PrintHelper.PrintFinancialReport(StartDate, EndDate, TotalBookings, TotalRevenue, TotalExpenses, NetProfit, settings);
         }
 
         public FinancialsViewModel()

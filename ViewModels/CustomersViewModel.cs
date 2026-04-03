@@ -46,10 +46,8 @@ namespace StadiumManagementSystem.ViewModels
         private void PrintStatement()
         {
             if (SelectedCustomer == null) return;
-            // Simplified: Reusing financial report style for customer statement
             var settings = App.Database.GetSettings();
-            decimal totalBalance = CustomerBookings.Sum(b => b.Balance);
-            System.Windows.MessageBox.Show($"Statement for {SelectedCustomer.Name}\nTotal Outstanding: {totalBalance:N0} YER\n(Printing feature integrated with FlowDocument)");
+            Helpers.PrintHelper.PrintCustomerStatement(SelectedCustomer, CustomerBookings, settings);
         }
     }
 }

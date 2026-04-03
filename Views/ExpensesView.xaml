@@ -20,15 +20,15 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Margin="0,0,10,0">
                     <TextBlock Text="Category" Foreground="Gray"/>
-                    <TextBox Text="{Binding NewCategory}" Padding="5"/>
+                    <TextBox Text="{Binding NewCategory, UpdateSourceTrigger=PropertyChanged}" Padding="5"/>
                 </StackPanel>
                 <StackPanel Grid.Column="1" Margin="0,0,10,0">
                     <TextBlock Text="Amount" Foreground="Gray"/>
-                    <TextBox Text="{Binding NewAmount}" Padding="5"/>
+                    <TextBox Text="{Binding NewAmount, UpdateSourceTrigger=PropertyChanged}" Padding="5"/>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Margin="0,0,10,0">
                     <TextBlock Text="Description" Foreground="Gray"/>
-                    <TextBox Text="{Binding NewDescription}" Padding="5"/>
+                    <TextBox Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}" Padding="5"/>
                 </StackPanel>
                 <Button Grid.Column="3" Content="Add Expense" Command="{Binding AddExpenseCommand}"
                         VerticalAlignment="Bottom" Padding="15,5" Background="#28A745" Foreground="White" BorderThickness="0"/>
