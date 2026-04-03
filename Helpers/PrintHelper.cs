@@ -10,45 +10,7 @@ namespace StadiumManagementSystem.Helpers
     {
         public static FlowDocument CreateReceiptDocument(Booking booking, Settings settings)
         {
-            FlowDocument doc = new FlowDocument();
-            doc.PagePadding = new Thickness(50);
-            doc.FontFamily = new FontFamily("Traditional Arabic, Segoe UI");
-            doc.FlowDirection = FlowDirection.RightToLeft;
-
-            // Header Grid
-            Grid headerGrid = new Grid();
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
-            headerGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            // Logo
-            if (!string.IsNullOrEmpty(settings.LogoPath) && System.IO.File.Exists(settings.LogoPath))
-            {
-                try {
-                    var bitmap = new System.Windows.Media.Imaging.BitmapImage(new Uri(System.IO.Path.GetFullPath(settings.LogoPath)));
-                    var image = new Image { Source = bitmap, Width = 100, Height = 100 };
-                    Grid.SetColumn(image, 1);
-                    headerGrid.Children.Add(image);
-                } catch {}
-            }
-
-            // Organization Info (Right side in RTL)
-            StackPanel rightInfo = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
-            rightInfo.Children.Add(new TextBlock { Text = settings.OrganizationName, FontSize = 22, FontWeight = FontWeights.Bold, HorizontalAlignment = HorizontalAlignment.Left });
-            rightInfo.Children.Add(new TextBlock { Text = settings.Location, FontSize = 12, HorizontalAlignment = HorizontalAlignment.Left });
-            rightInfo.Children.Add(new TextBlock { Text = settings.Phone, FontSize = 12, HorizontalAlignment = HorizontalAlignment.Left });
-            Grid.SetColumn(rightInfo, 0);
-            headerGrid.Children.Add(rightInfo);
-
-            // Title Section (Left side in RTL)
-            StackPanel leftInfo = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Right };
-            leftInfo.Children.Add(new TextBlock { Text = "سند قبض", FontSize = 26, FontWeight = FontWeights.Bold });
-            leftInfo.Children.Add(new TextBlock { Text = "CASH RECEIPT", FontSize = 16, FontWeight = FontWeights.SemiBold });
-            Grid.SetColumn(leftInfo, 2);
-            headerGrid.Children.Add(leftInfo);
-
-            doc.Blocks.Add(new BlockUIContainer(headerGrid));
-            doc.Blocks.Add(new Paragraph(new Run("----------------------------------------------------------------------------------------------------")) { TextAlignment = TextAlignment.Center });
+            FlowDocument doc = CreateBaseDocument(settings, "سند قبض", "CASH RECEIPT");
 
             // Details Table
             Table table = new Table { CellSpacing = 5, Margin = new Thickness(0, 20, 0, 20) };
@@ -158,117 +120,92 @@ namespace StadiumManagementSystem.Helpers
             return row;
         }
 
-        public static void PrintSchedule(DateTime date, string stadium, IEnumerable<ViewModels.ScheduleSlot> slots, Settings settings)
+        public static FlowDocument CreateScheduleDocument(DateTime date, string stadium, IEnumerable<ViewModels.ScheduleSlot> slots, Settings settings)
         {
-            try
+            FlowDocument doc = CreateBaseDocument(settings, "جدول الحجوزات", "STADIUM SCHEDULE");
+            doc.Blocks.Add(new Paragraph(new Run($"Date: {date:d} | Stadium: {stadium}")) { TextAlignment = TextAlignment.Center });
+
+            Table table = new Table { CellSpacing = 0, BorderBrush = Brushes.Black, BorderThickness = new Thickness(1) };
+            table.Columns.Add(new TableColumn { Width = new GridLength(150) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(100) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
+
+            TableRowGroup group = new TableRowGroup();
+            TableRow headerRow = new TableRow { FontWeight = FontWeights.Bold, Background = Brushes.LightGray };
+            headerRow.Cells.Add(CreateCell("Time Slot"));
+            headerRow.Cells.Add(CreateCell("Status"));
+            headerRow.Cells.Add(CreateCell("Customer"));
+            group.Rows.Add(headerRow);
+
+            foreach (var slot in slots)
             {
-                PrintDialog printDialog = new PrintDialog();
-                if (printDialog.ShowDialog() == true)
-                {
-                    FlowDocument doc = CreateBaseDocument(settings, "جدول الحجوزات", "STADIUM SCHEDULE");
-                    doc.Blocks.Add(new Paragraph(new Run($"Date: {date:d} | Stadium: {stadium}")) { TextAlignment = TextAlignment.Center });
-
-                    Table table = new Table { CellSpacing = 0, BorderBrush = Brushes.Black, BorderThickness = new Thickness(1) };
-                    table.Columns.Add(new TableColumn { Width = new GridLength(150) });
-                    table.Columns.Add(new TableColumn { Width = new GridLength(100) });
-                    table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
-
-                    TableRowGroup group = new TableRowGroup();
-                    TableRow headerRow = new TableRow { FontWeight = FontWeights.Bold, Background = Brushes.LightGray };
-                    headerRow.Cells.Add(CreateCell("Time Slot"));
-                    headerRow.Cells.Add(CreateCell("Status"));
-                    headerRow.Cells.Add(CreateCell("Customer"));
-                    group.Rows.Add(headerRow);
-
-                    foreach (var slot in slots)
-                    {
-                        TableRow row = new TableRow();
-                        row.Cells.Add(CreateCell(slot.TimeRange));
-                        row.Cells.Add(CreateCell(slot.Status));
-                        row.Cells.Add(CreateCell(slot.Customer));
-                        group.Rows.Add(row);
-                    }
-
-                    table.RowGroups.Add(group);
-                    doc.Blocks.Add(table);
-                    AddFooter(doc, settings);
-
-                    printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Stadium Schedule");
-                }
+                TableRow row = new TableRow();
+                row.Cells.Add(CreateCell(slot.TimeRange));
+                row.Cells.Add(CreateCell(slot.Status));
+                row.Cells.Add(CreateCell(slot.Customer));
+                group.Rows.Add(row);
             }
-            catch (Exception ex) { MessageBox.Show("Error printing schedule: " + ex.Message); }
+
+            table.RowGroups.Add(group);
+            doc.Blocks.Add(table);
+            AddFooter(doc, settings);
+            return doc;
         }
 
-        public static void PrintFinancialReport(DateTime start, DateTime end, int totalBookings, decimal totalRevenue, decimal totalExpenses, decimal netProfit, Settings settings)
+        public static FlowDocument CreateFinancialReportDocument(DateTime start, DateTime end, int totalBookings, decimal totalRevenue, decimal totalExpenses, decimal netProfit, Settings settings)
         {
-            try
-            {
-                PrintDialog printDialog = new PrintDialog();
-                if (printDialog.ShowDialog() == true)
-                {
-                    FlowDocument doc = CreateBaseDocument(settings, "التقرير المالي", "FINANCIAL REPORT");
-                    doc.Blocks.Add(new Paragraph(new Run($"Period: {start:d} to {end:d}")) { TextAlignment = TextAlignment.Center });
+            FlowDocument doc = CreateBaseDocument(settings, "التقرير المالي", "FINANCIAL REPORT");
+            doc.Blocks.Add(new Paragraph(new Run($"Period: {start:d} to {end:d}")) { TextAlignment = TextAlignment.Center });
 
-                    Section summary = new Section();
-                    summary.Blocks.Add(new Paragraph(new Run($"Total Bookings / إجمالي الحجوزات: {totalBookings}")) { FontSize = 16 });
-                    summary.Blocks.Add(new Paragraph(new Run($"Total Revenue / إجمالي الإيرادات: {totalRevenue:N0} YER")) { FontSize = 16 });
-                    summary.Blocks.Add(new Paragraph(new Run($"Total Expenses / إجمالي المصاريف: {totalExpenses:N0} YER")) { FontSize = 16 });
-                    summary.Blocks.Add(new Paragraph(new Run($"Net Profit / صافي الربح: {netProfit:N0} YER")) { FontSize = 18, FontWeight = FontWeights.Bold });
-                    doc.Blocks.Add(summary);
+            Section summary = new Section();
+            summary.Blocks.Add(new Paragraph(new Run($"Total Bookings / إجمالي الحجوزات: {totalBookings}")) { FontSize = 16 });
+            summary.Blocks.Add(new Paragraph(new Run($"Total Revenue / إجمالي الإيرادات: {totalRevenue:N0} YER")) { FontSize = 16 });
+            summary.Blocks.Add(new Paragraph(new Run($"Total Expenses / إجمالي المصاريف: {totalExpenses:N0} YER")) { FontSize = 16 });
+            summary.Blocks.Add(new Paragraph(new Run($"Net Profit / صافي الربح: {netProfit:N0} YER")) { FontSize = 18, FontWeight = FontWeights.Bold });
+            doc.Blocks.Add(summary);
 
-                    AddFooter(doc, settings);
-                    printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Financial Report");
-                }
-            }
-            catch (Exception ex) { MessageBox.Show("Error printing report: " + ex.Message); }
+            AddFooter(doc, settings);
+            return doc;
         }
 
-        public static void PrintCustomerStatement(Customer customer, IEnumerable<Booking> bookings, Settings settings)
+        public static FlowDocument CreateCustomerStatementDocument(Customer customer, IEnumerable<Booking> bookings, Settings settings)
         {
-            try
+            FlowDocument doc = CreateBaseDocument(settings, "كشف حساب عميل", "CUSTOMER STATEMENT");
+            doc.Blocks.Add(new Paragraph(new Run($"Customer / العميل: {customer.Name}")) { FontSize = 16, FontWeight = FontWeights.Bold });
+            doc.Blocks.Add(new Paragraph(new Run($"Phone / الهاتف: {customer.Phone}")) { FontSize = 14 });
+
+            Table table = new Table { CellSpacing = 0, BorderBrush = Brushes.Black, BorderThickness = new Thickness(1), Margin = new Thickness(0, 20, 0, 20) };
+            table.Columns.Add(new TableColumn { Width = new GridLength(100) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(100) });
+            table.Columns.Add(new TableColumn { Width = new GridLength(100) });
+
+            TableRowGroup group = new TableRowGroup();
+            TableRow headerRow = new TableRow { FontWeight = FontWeights.Bold, Background = Brushes.LightGray };
+            headerRow.Cells.Add(CreateCell("Date"));
+            headerRow.Cells.Add(CreateCell("Details"));
+            headerRow.Cells.Add(CreateCell("Total"));
+            headerRow.Cells.Add(CreateCell("Balance"));
+            group.Rows.Add(headerRow);
+
+            foreach (var b in bookings)
             {
-                PrintDialog printDialog = new PrintDialog();
-                if (printDialog.ShowDialog() == true)
-                {
-                    FlowDocument doc = CreateBaseDocument(settings, "كشف حساب عميل", "CUSTOMER STATEMENT");
-                    doc.Blocks.Add(new Paragraph(new Run($"Customer / العميل: {customer.Name}")) { FontSize = 16, FontWeight = FontWeights.Bold });
-                    doc.Blocks.Add(new Paragraph(new Run($"Phone / الهاتف: {customer.Phone}")) { FontSize = 14 });
-
-                    Table table = new Table { CellSpacing = 0, BorderBrush = Brushes.Black, BorderThickness = new Thickness(1), Margin = new Thickness(0, 20, 0, 20) };
-                    table.Columns.Add(new TableColumn { Width = new GridLength(100) });
-                    table.Columns.Add(new TableColumn { Width = new GridLength(1, GridUnitType.Star) });
-                    table.Columns.Add(new TableColumn { Width = new GridLength(100) });
-                    table.Columns.Add(new TableColumn { Width = new GridLength(100) });
-
-                    TableRowGroup group = new TableRowGroup();
-                    TableRow headerRow = new TableRow { FontWeight = FontWeights.Bold, Background = Brushes.LightGray };
-                    headerRow.Cells.Add(CreateCell("Date"));
-                    headerRow.Cells.Add(CreateCell("Details"));
-                    headerRow.Cells.Add(CreateCell("Total"));
-                    headerRow.Cells.Add(CreateCell("Balance"));
-                    group.Rows.Add(headerRow);
-
-                    foreach (var b in bookings)
-                    {
-                        TableRow row = new TableRow();
-                        row.Cells.Add(CreateCell(b.BookingDate.ToString("d")));
-                        row.Cells.Add(CreateCell($"{b.Stadium} ({b.TimeSlot})"));
-                        row.Cells.Add(CreateCell(b.TotalPrice.ToString("N0")));
-                        row.Cells.Add(CreateCell(b.Balance.ToString("N0")));
-                        group.Rows.Add(row);
-                    }
-
-                    table.RowGroups.Add(group);
-                    doc.Blocks.Add(table);
-
-                    decimal totalBalance = bookings.Sum(b => b.Balance);
-                    doc.Blocks.Add(new Paragraph(new Run($"Total Outstanding / الرصيد المتبقي: {totalBalance:N0} YER")) { FontSize = 18, FontWeight = FontWeights.Bold, TextAlignment = TextAlignment.Right });
-
-                    AddFooter(doc, settings);
-                    printDialog.PrintDocument(((IDocumentPaginatorSource)doc).DocumentPaginator, "Customer Statement");
-                }
+                TableRow row = new TableRow();
+                row.Cells.Add(CreateCell(b.BookingDate.ToString("d")));
+                row.Cells.Add(CreateCell($"{b.Stadium} ({b.TimeSlot})"));
+                row.Cells.Add(CreateCell(b.TotalPrice.ToString("N0")));
+                row.Cells.Add(CreateCell(b.Balance.ToString("N0")));
+                group.Rows.Add(row);
             }
-            catch (Exception ex) { MessageBox.Show("Error printing statement: " + ex.Message); }
+
+            table.RowGroups.Add(group);
+            doc.Blocks.Add(table);
+
+            decimal totalBalance = bookings.Sum(b => b.Balance);
+            doc.Blocks.Add(new Paragraph(new Run($"Total Outstanding / الرصيد المتبقي: {totalBalance:N0} YER")) { FontSize = 18, FontWeight = FontWeights.Bold, TextAlignment = TextAlignment.Right });
+
+            AddFooter(doc, settings);
+            return doc;
         }
 
         private static FlowDocument CreateBaseDocument(Settings settings, string titleAr, string titleEn)

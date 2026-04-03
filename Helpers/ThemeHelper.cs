@@ -7,6 +7,7 @@ namespace StadiumManagementSystem.Helpers
     {
         public static void ApplyTheme(string colorHex)
         {
+            if (string.IsNullOrEmpty(colorHex)) colorHex = "#1F4E78";
             try
             {
                 var converter = new BrushConverter();

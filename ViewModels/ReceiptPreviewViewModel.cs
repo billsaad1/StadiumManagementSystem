@@ -12,16 +12,15 @@ namespace StadiumManagementSystem.ViewModels
         [ObservableProperty]
         private FlowDocument _receiptDocument;
 
-        private Booking _booking;
-        private Settings _settings;
+        [ObservableProperty]
+        private string _windowTitle = "Print Preview";
 
         public event Action? RequestClose;
 
-        public ReceiptPreviewViewModel(Booking booking, Settings settings)
+        public ReceiptPreviewViewModel(FlowDocument document, string title = "Print Preview")
         {
-            _booking = booking;
-            _settings = settings;
-            _receiptDocument = Helpers.PrintHelper.CreateReceiptDocument(booking, settings);
+            _receiptDocument = document;
+            _windowTitle = title;
         }
 
         [RelayCommand]

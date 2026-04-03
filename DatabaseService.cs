@@ -31,6 +31,9 @@ namespace StadiumManagementSystem.Data
             ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Payments (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
             ExecuteNonQuery(connection, @"CREATE TABLE IF NOT EXISTS Expenses (Id INTEGER PRIMARY KEY AUTOINCREMENT);");
 
+            // Fix for existing Expenses table if it has 'Date' instead of 'ExpenseDate'
+            FixExpensesTableSchema(connection);
+
             // 2. Incremental Migration Safety (One column at a time for ALL columns)
             // Users
             AddColumnIfMissing(connection, "Users", "Username", "TEXT");
@@ -602,25 +605,65 @@ namespace StadiumManagementSystem.Data
         {
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
+
+            // Check if legacy 'Date' column exists to avoid NOT NULL constraint failure
+            bool hasLegacyDate = false;
+            using (var checkCmd = connection.CreateCommand())
+            {
+                checkCmd.CommandText = "PRAGMA table_info(Expenses);";
+                using var reader = checkCmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    if (reader.GetString(1).Equals("Date", StringComparison.OrdinalIgnoreCase))
+                    {
+                        hasLegacyDate = true;
+                        break;
+                    }
+                }
+            }
+
             var command = connection.CreateCommand();
+            string dateValue = expense.ExpenseDate.ToString("yyyy-MM-dd HH:mm:ss");
+
             if (expense.Id == 0)
             {
-                command.CommandText = @"
-                    INSERT INTO Expenses (Category, Amount, ExpenseDate, Description, CreatedBy)
-                    VALUES (@c, @a, @d, @desc, @cb)
-                ";
+                if (hasLegacyDate)
+                {
+                    command.CommandText = @"
+                        INSERT INTO Expenses (Category, Amount, ExpenseDate, Date, Description, CreatedBy)
+                        VALUES (@c, @a, @d, @d, @desc, @cb)
+                    ";
+                }
+                else
+                {
+                    command.CommandText = @"
+                        INSERT INTO Expenses (Category, Amount, ExpenseDate, Description, CreatedBy)
+                        VALUES (@c, @a, @d, @desc, @cb)
+                    ";
+                }
             }
             else
             {
-                command.CommandText = @"
-                    UPDATE Expenses SET Category=@c, Amount=@a, ExpenseDate=@d, Description=@desc, CreatedBy=@cb
-                    WHERE Id=@id
-                ";
+                if (hasLegacyDate)
+                {
+                    command.CommandText = @"
+                        UPDATE Expenses SET Category=@c, Amount=@a, ExpenseDate=@d, Date=@d, Description=@desc, CreatedBy=@cb
+                        WHERE Id=@id
+                    ";
+                }
+                else
+                {
+                    command.CommandText = @"
+                        UPDATE Expenses SET Category=@c, Amount=@a, ExpenseDate=@d, Description=@desc, CreatedBy=@cb
+                        WHERE Id=@id
+                    ";
+                }
                 command.Parameters.AddWithValue("@id", expense.Id);
             }
+
             command.Parameters.AddWithValue("@c", expense.Category);
             command.Parameters.AddWithValue("@a", expense.Amount);
-            command.Parameters.AddWithValue("@d", expense.ExpenseDate.ToString("yyyy-MM-dd HH:mm:ss"));
+            command.Parameters.AddWithValue("@d", dateValue);
             command.Parameters.AddWithValue("@desc", expense.Description ?? "");
             command.Parameters.AddWithValue("@cb", expense.CreatedBy ?? "");
             command.ExecuteNonQuery();
@@ -666,6 +709,39 @@ namespace StadiumManagementSystem.Data
             using var command = connection.CreateCommand();
             command.CommandText = sql;
             command.ExecuteNonQuery();
+        }
+
+        private void FixExpensesTableSchema(SqliteConnection connection)
+        {
+            try
+            {
+                using var checkCmd = connection.CreateCommand();
+                checkCmd.CommandText = "PRAGMA table_info(Expenses);";
+                bool hasDate = false;
+                bool hasExpenseDate = false;
+                using (var reader = checkCmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string name = reader.GetString(1);
+                        if (name.Equals("Date", StringComparison.OrdinalIgnoreCase)) hasDate = true;
+                        if (name.Equals("ExpenseDate", StringComparison.OrdinalIgnoreCase)) hasExpenseDate = true;
+                    }
+                }
+
+                if (hasDate && !hasExpenseDate)
+                {
+                    ExecuteNonQuery(connection, "ALTER TABLE Expenses RENAME COLUMN Date TO ExpenseDate;");
+                }
+                else if (hasDate && hasExpenseDate)
+                {
+                    // If both exist, ensure Date doesn't cause NOT NULL failures by giving it a default if possible,
+                    // or just ignore it if we can.
+                    // SQLite doesn't easily support DROP COLUMN in all versions, so we'll try to just clear the NOT NULL constraint
+                    // by recreating the table if absolutely necessary, but for now let's just make sure our inserts are explicit.
+                }
+            }
+            catch { }
         }
 
         private void AddColumnIfMissing(SqliteConnection connection, string tableName, string columnName, string columnType)

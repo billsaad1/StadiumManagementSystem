@@ -47,9 +47,15 @@
             </DataGrid>
         </GroupBox>
 
-        <StackPanel Grid.Row="2">
-            <Button Content="Close" Command="{Binding CancelCommand}"
-                    Padding="8" Background="Gray" Foreground="White" BorderThickness="0"/>
-        </StackPanel>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="Print Receipt" Command="{Binding PrintReceiptCommand}"
+                    Margin="0,0,5,0" Padding="8" Background="{DynamicResource PrimaryColor}" Foreground="White" BorderThickness="0"/>
+            <Button Grid.Column="1" Content="Close" Command="{Binding CancelCommand}"
+                    Margin="5,0,0,0" Padding="8" Background="Gray" Foreground="White" BorderThickness="0"/>
+        </Grid>
     </Grid>
 </Window>

@@ -42,23 +42,30 @@ namespace StadiumManagementSystem.ViewModels
         [RelayCommand]
         private void AddExpense()
         {
-            if (string.IsNullOrEmpty(NewCategory) || NewAmount <= 0) return;
-
-            var expense = new Expense
+            try
             {
-                Category = NewCategory,
-                Amount = NewAmount,
-                Description = NewDescription,
-                ExpenseDate = DateTime.Now,
-                CreatedBy = "Admin" // Simplified
-            };
+                if (string.IsNullOrEmpty(NewCategory) || NewAmount <= 0) return;
 
-            App.Database.SaveExpense(expense);
-            LoadExpenses();
+                var expense = new Expense
+                {
+                    Category = NewCategory,
+                    Amount = NewAmount,
+                    Description = NewDescription,
+                    ExpenseDate = DateTime.Now,
+                    CreatedBy = "Admin" // Simplified
+                };
 
-            NewCategory = string.Empty;
-            NewAmount = 0;
-            NewDescription = string.Empty;
+                App.Database.SaveExpense(expense);
+                LoadExpenses();
+
+                NewCategory = string.Empty;
+                NewAmount = 0;
+                NewDescription = string.Empty;
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show("Error adding expense: " + ex.Message);
+            }
         }
 
         [RelayCommand]

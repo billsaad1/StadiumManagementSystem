@@ -47,7 +47,10 @@ namespace StadiumManagementSystem.ViewModels
         {
             if (SelectedCustomer == null) return;
             var settings = App.Database.GetSettings();
-            Helpers.PrintHelper.PrintCustomerStatement(SelectedCustomer, CustomerBookings, settings);
+            var doc = Helpers.PrintHelper.CreateCustomerStatementDocument(SelectedCustomer, CustomerBookings, settings);
+            var vm = new ReceiptPreviewViewModel(doc, "Customer Statement Preview");
+            var view = new Views.ReceiptPreviewView { DataContext = vm };
+            view.ShowDialog();
         }
     }
 }
