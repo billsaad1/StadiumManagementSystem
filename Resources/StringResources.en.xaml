@@ -21,7 +21,10 @@
     <system:String x:Key="Clear">Clear</system:String>
     <system:String x:Key="Settings">Settings</system:String>
     <system:String x:Key="Logout">Logout</system:String>
-    <FlowDirection x:Key="FlowDirection">LeftToRight</FlowDirection>
+
+    <!-- FlowDirection is used for the entire application layout -->
+    <x:Static x:Key="FlowDirection" Member="FlowDirection.LeftToRight"/>
+
     <system:String x:Key="BookingsToday">Bookings Today</system:String>
     <system:String x:Key="RevenueToday">Revenue Today</system:String>
     <system:String x:Key="AvailableSlots">Available Slots</system:String>
@@ -32,4 +35,11 @@
     <system:String x:Key="OrganizationName">Organization Name</system:String>
     <system:String x:Key="ManagerName">Manager Name</system:String>
     <system:String x:Key="Location">Location</system:String>
+    <system:String x:Key="Expenses">Expenses</system:String>
+    <system:String x:Key="TotalRevenue">Total Revenue</system:String>
+    <system:String x:Key="TotalExpenses">Total Expenses</system:String>
+    <system:String x:Key="NetProfit">Net Profit</system:String>
+    <system:String x:Key="PaymentHistory">Payment History</system:String>
+    <system:String x:Key="AddPayment">Add Payment</system:String>
+    <system:String x:Key="PrintStatement">Print Statement</system:String>
 </ResourceDictionary>

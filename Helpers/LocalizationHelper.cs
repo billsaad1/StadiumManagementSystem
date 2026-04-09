@@ -10,10 +10,10 @@ namespace StadiumManagementSystem.Helpers
             switch (languageCode)
             {
                 case "ar":
-                    dict.Source = new Uri("/Resources/StringResources.ar.xaml", UriKind.Relative);
+                    dict.Source = new Uri("pack://application:,,,/Resources/StringResources.ar.xaml", UriKind.Absolute);
                     break;
                 default:
-                    dict.Source = new Uri("/Resources/StringResources.en.xaml", UriKind.Relative);
+                    dict.Source = new Uri("pack://application:,,,/Resources/StringResources.en.xaml", UriKind.Absolute);
                     break;
             }
 

@@ -1,0 +1,69 @@
+<UserControl x:Class="StadiumManagementSystem.Views.ExpensesView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="{DynamicResource Expenses}" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource PrimaryColor}" Margin="0,0,0,20"/>
+
+        <Border Grid.Row="1" Background="White" Padding="15" CornerRadius="8" Effect="{StaticResource CardShadow}" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="2*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Margin="0,0,10,0">
+                    <TextBlock Text="Category" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewCategory, UpdateSourceTrigger=PropertyChanged}" Padding="5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="0,0,10,0">
+                    <TextBlock Text="Amount" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewAmount, UpdateSourceTrigger=PropertyChanged}" Padding="5"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Margin="0,0,10,0">
+                    <TextBlock Text="Description" Foreground="Gray"/>
+                    <TextBox Text="{Binding NewDescription, UpdateSourceTrigger=PropertyChanged}" Padding="5"/>
+                </StackPanel>
+                <Button Grid.Column="3" Content="Add Expense" Command="{Binding AddExpenseCommand}"
+                        VerticalAlignment="Bottom" Padding="15,5" Background="#28A745" Foreground="White" BorderThickness="0"/>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <TextBlock Text="From:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <DatePicker SelectedDate="{Binding StartDate}" Width="120" Margin="0,0,15,0"/>
+                <TextBlock Text="To:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <DatePicker SelectedDate="{Binding EndDate}" Width="120"/>
+            </StackPanel>
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Expenses}" AutoGenerateColumns="False" IsReadOnly="True" Background="White">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Date" Binding="{Binding ExpenseDate, StringFormat=d}" Width="100"/>
+                    <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="150"/>
+                    <DataGridTextColumn Header="Amount" Binding="{Binding Amount, StringFormat=N0}" Width="120"/>
+                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+                    <DataGridTemplateColumn Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="Delete" Command="{Binding DataContext.DeleteExpenseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}" Background="#DC3545" Foreground="White" BorderThickness="0" Padding="5,2"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Grid>
+</UserControl>

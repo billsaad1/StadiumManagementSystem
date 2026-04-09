@@ -42,7 +42,10 @@ namespace StadiumManagementSystem.ViewModels
         private void Print()
         {
             var settings = App.Database.GetSettings();
-            Helpers.PrintHelper.PrintSchedule(SelectedDate, SelectedStadium, Slots, settings);
+            var doc = Helpers.PrintHelper.CreateScheduleDocument(SelectedDate, SelectedStadium, Slots, settings);
+            var vm = new ReceiptPreviewViewModel(doc, "Schedule Preview");
+            var view = new Views.ReceiptPreviewView { DataContext = vm };
+            view.ShowDialog();
         }
 
         public ScheduleViewModel()

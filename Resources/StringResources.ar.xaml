@@ -21,7 +21,9 @@
     <system:String x:Key="Clear">مسح</system:String>
     <system:String x:Key="Settings">الإعدادات</system:String>
     <system:String x:Key="Logout">تسجيل الخروج</system:String>
-    <FlowDirection x:Key="FlowDirection">RightToLeft</FlowDirection>
+
+    <x:Static x:Key="FlowDirection" Member="FlowDirection.RightToLeft"/>
+
     <system:String x:Key="BookingsToday">حجوزات اليوم</system:String>
     <system:String x:Key="RevenueToday">إيرادات اليوم</system:String>
     <system:String x:Key="AvailableSlots">الفتحات المتاحة</system:String>
@@ -32,4 +34,11 @@
     <system:String x:Key="OrganizationName">اسم المنظمة</system:String>
     <system:String x:Key="ManagerName">اسم المدير</system:String>
     <system:String x:Key="Location">الموقع</system:String>
+    <system:String x:Key="Expenses">المصروفات</system:String>
+    <system:String x:Key="TotalRevenue">إجمالي الإيرادات</system:String>
+    <system:String x:Key="TotalExpenses">إجمالي المصروفات</system:String>
+    <system:String x:Key="NetProfit">صافي الربح</system:String>
+    <system:String x:Key="PaymentHistory">سجل المدفوعات</system:String>
+    <system:String x:Key="AddPayment">إضافة دفعة</system:String>
+    <system:String x:Key="PrintStatement">طباعة كشف حساب</system:String>
 </ResourceDictionary>
